@@ -929,24 +929,42 @@ export function createAuthRoutes(
 
     /**
      * Verify 2FA code and enable 2FA
+     * Rate limited: 5 attempts per 60 seconds per user to prevent brute force.
      */
     .post(
       '/2fa/verify',
-      async ({ body, user, request }) => {
+      async ({ body, user, request, set }) => {
         const currentUser = getUser({ user });
         const ip_address = request.headers.get('x-forwarded-for') || undefined;
 
-        // Get 2FA record
+        // Rate-limit: check failed_attempts with a sliding window
         const twoFaRecord = await db.queryOne<{
           totp_secret: string;
           enabled: boolean;
+          failed_attempts: number;
+          last_failed_at: string | null;
         }>(
-          `SELECT totp_secret, enabled FROM user_2fa WHERE user_id = $1`,
+          `SELECT totp_secret, enabled, failed_attempts, last_failed_at FROM user_2fa WHERE user_id = $1`,
           [currentUser.id]
         );
 
         if (!twoFaRecord || !twoFaRecord.totp_secret) {
           throw new Error('2FA not set up. Please call /2fa/setup first.');
+        }
+
+        // Brute-force protection: if > 5 failed attempts in the last 60 seconds, block
+        if (twoFaRecord.failed_attempts >= 5 && twoFaRecord.last_failed_at) {
+          const lastFailed = new Date(twoFaRecord.last_failed_at).getTime();
+          const windowStart = Date.now() - 60_000;
+          if (lastFailed > windowStart) {
+            set.status = 429;
+            return { error: 'Too many attempts. Please wait before trying again.' };
+          }
+          // Window expired — reset failed count
+          await db.execute(
+            `UPDATE user_2fa SET failed_attempts = 0 WHERE user_id = $1`,
+            [currentUser.id]
+          );
         }
 
         // Verify TOTP code

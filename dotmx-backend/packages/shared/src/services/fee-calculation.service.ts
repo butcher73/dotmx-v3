@@ -319,7 +319,9 @@ export class FeeCalculationService {
     // Calculate what tier they should be at
     const calculatedTier = await this.calculateFeeTier(volume30dUSD, dmxBalance);
 
-    // Check if tier is locked (7-day lock after upgrade)
+    // Check if tier is locked. After any tier change, all changes are blocked
+    // for 7 days. This prevents chain-upgrade exploitation where a user would
+    // downgrade then immediately re-upgrade within the lock window.
     const isLocked = userTier.tier_locked_until && userTier.tier_locked_until > new Date();
 
     // Determine if tier should change
@@ -403,10 +405,10 @@ export class FeeCalculationService {
       effectiveTakerFeeWithDMX = effectiveTakerFee * (1 - dmxConfig.discount_percentage);
     }
 
-    // Set lock period for upgrades (7 days)
-    const tierLockedUntil = changeType === 'upgrade'
-      ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-      : null;
+    // Set lock period for any tier change (7 days).
+    // Both upgrades and downgrades are locked to prevent chain-upgrade
+    // exploitation (downgrade → immediately upgrade within same window).
+    const tierLockedUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     // Update user tier
     const updateQuery = `

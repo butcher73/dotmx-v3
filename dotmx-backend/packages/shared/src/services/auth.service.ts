@@ -473,14 +473,13 @@ export class AuthService {
     refresh_token: string,
     metadata: { ip_address?: string; user_agent?: string } = {}
   ): Promise<AuthTokens> {
-    // TOKEN ROTATION (race-condition safe): Atomically claim the refresh token
-    // by updating last_activity_at. Only one concurrent request will get a row
-    // back because the subsequent full revocation at the end of this method
-    // marks the old session as revoked.
+    // TOKEN ROTATION (race-condition safe): Atomically mark the old session
+    // as revoked AND claim it in a single UPDATE. PostgreSQL's row-level locking
+    // guarantees that concurrent refreshes serialize: the second UPDATE sees
+    // revoked = TRUE (set by the first) and returns nothing.
     const result = await this.db.queryOne<{
       id: string;
       user_id: string;
-      // User fields with u_ prefix to avoid conflict
       u_id: string;
       u_email: string | null;
       u_role: string;
@@ -498,7 +497,8 @@ export class AuthService {
       u_deleted_at: Date | null;
     }>(
       `UPDATE sessions s
-       SET last_activity_at = NOW()
+       SET revoked = TRUE, revoked_at = NOW(), revoked_reason = 'Token refreshed (rotation)',
+           last_activity_at = NOW()
        FROM users u
        WHERE s.user_id = u.id
          AND s.refresh_token = $1
@@ -552,13 +552,6 @@ export class AuthService {
 
     // Generate new tokens
     const tokens = await this.generateTokens(user, metadata);
-
-    // Revoke the old session now that new tokens are issued.
-    // Single-use: each refresh token can only be used once.
-    await this.db.execute(
-      'UPDATE sessions SET revoked = TRUE, revoked_at = NOW(), revoked_reason = $1 WHERE id = $2',
-      ['Token refreshed (rotation)', result.id]
-    );
 
     // Update last activity on the new session
     await this.db.execute(
