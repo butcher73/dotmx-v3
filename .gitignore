@@ -1,16 +1,21 @@
-# Dependencies (pnpm)
+# Dependencies
 node_modules/
 .pnpm-store/
 
+# Lock files (generated, don't check in)
+bun.lock
+bun.lockb
+pnpm-lock.yaml
+package-lock.json
+
 # Build outputs
 dist/
-*.tsbuildinfo
 .next/
 .netlify/
+.turbo/
 
-# Data
-data/
-*.log
+# TypeScript
+*.tsbuildinfo
 
 # Environment
 .env
@@ -19,11 +24,22 @@ data/
 .env.development
 .env.production
 
-# IDE
+# Data / logs
+data/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE / editor
 .vscode/
 .idea/
 *.swp
 *.swo
+*.tmp
+*.bak
+*~
 
 # OS
 .DS_Store
@@ -36,6 +52,11 @@ docker-compose.override.yml
 coverage/
 .nyc_output/
 
+# Debug / dumps
+*.heapsnapshot
+*.cpuprofile
+*.core
+
 # Rust
 target/
 Cargo.lock
@@ -45,10 +66,15 @@ Cargo.lock
 *.profraw
 *.profdata
 
-# Secrets & Credentials
+# Secrets & credentials
 secrets/
 .mm-credentials.json
 dotmx-*.json
+
+# Uploads / runtime dirs
+uploads/
+tmp/
+temp/
 
 # Git
 .git/
