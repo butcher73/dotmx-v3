@@ -2,7 +2,7 @@
 
 This document tracks the differences between the original DotMX design and the actual implementation.
 
-**Last Updated:** January 2026  
+**Last Updated:** January 2026
 **Status:** Production Implementation Complete
 
 ---
@@ -47,7 +47,7 @@ DotMX was originally conceived as a high-performance spot trading exchange. Duri
    - Advanced order types
 ```
 
-**Why Changed:**  
+**Why Changed:**
 Market demand for perpetual futures is significantly higher than spot trading. Implementing futures first allows faster go-to-market with a more compelling product.
 
 ---
@@ -67,7 +67,7 @@ Discounts: Simple volume-based
 10 VIP Tiers (Tier 0 - Tier 9):
   Maker: -0.005% to -0.025% (REBATES)
   Taker: 0.035% to 0.015%
-  
+
 Tier Requirements:
   - 30-day volume (USDT)
   - DMX token holdings
@@ -78,14 +78,14 @@ Funding Fee: Dynamic, 8-hour intervals
 Liquidation: 0.4% penalty
 ```
 
-**Why Changed:**  
+**Why Changed:**
 Competitive analysis showed Binance and Bybit dominate with maker rebates and deep tier structures. To compete, DotMX adopted industry-standard tiering with maker incentives.
 
 **Implementation Files:**
 - [perpetual-fee.service.ts](dotmx-backend/packages/shared/src/services/perpetual-fee.service.ts)
 - [perpetual_fee_schema.sql](dotmx-backend/packages/shared/src/db/perpetual_fee_schema.sql)
 - [init_perpetual_fees.sql](dotmx-backend/packages/shared/src/db/init_perpetual_fees.sql)
-- [PERPETUAL_FEES.md](dotmx-backend/docs/PERPETUAL_FEES.md)
+- [PERPETUAL_FEES.md](dotmx-backend/docs/reference/PERPETUAL_FEES.md)
 
 ---
 
@@ -126,7 +126,7 @@ Competitive analysis showed Binance and Bybit dominate with maker rebates and de
    - Internal HD wallet system (GCP KMS)
 ```
 
-**Why Changed:**  
+**Why Changed:**
 Production exchanges require robust authentication. Original design lacked user account management entirely. Added enterprise-grade security with TOTP 2FA and wallet authentication for Web3 users.
 
 **Implementation Files:**
@@ -167,12 +167,12 @@ Production exchanges require robust authentication. Original design lacked user 
    - Rate limiting documentation
 ```
 
-**Why Changed:**  
+**Why Changed:**
 Professional exchanges require comprehensive API documentation. Added OpenAPI/Swagger for developer experience and API discoverability.
 
 **Implementation Files:**
-- [openapi.json](dotmx-backend/docs/openapi.json)
-- [API.md](dotmx-backend/docs/API.md)
+- [openapi.json](dotmx-backend/docs/reference/openapi.json)
+- [API.md](dotmx-backend/docs/api/API.md)
 - [routes/index.ts](dotmx-backend/packages/api/src/routes/index.ts) (with @elysiajs/swagger)
 
 ---
@@ -232,7 +232,7 @@ Loyalty:
   ✅ loyalty_points_transactions
 ```
 
-**Why Changed:**  
+**Why Changed:**
 Original design underestimated database complexity. Production exchanges require extensive data tracking for compliance, security, and user management.
 
 ---
@@ -299,23 +299,23 @@ Features:
 These features were in the original plan but deferred to post-launch:
 
 ### ZK Batch Verification
-**Original:** ZK proofs for trade verification and privacy  
-**Status:** Deferred  
+**Original:** ZK proofs for trade verification and privacy
+**Status:** Deferred
 **Reason:** Not required for MVP; adds complexity without immediate user benefit
 
 ### Mobile App
-**Original:** Native mobile applications  
-**Status:** Deferred  
+**Original:** Native mobile applications
+**Status:** Deferred
 **Reason:** Web-first approach; mobile can come post-launch
 
 ### Cross-Chain Bridges
-**Original:** Native bridge integrations  
-**Status:** Deferred  
+**Original:** Native bridge integrations
+**Status:** Deferred
 **Reason:** Use third-party bridges initially (Wormhole, LayerZero)
 
 ### Governance Token
-**Original:** DAO governance with voting  
-**Status:** Deferred  
+**Original:** DAO governance with voting
+**Status:** Deferred
 **Reason:** DMX token exists for fee discounts; governance post-launch
 
 ---
@@ -436,13 +436,13 @@ Rust Engine:
   - 95% code coverage
   - Unit + integration tests
   - Benchmark suite
-  
+
 TypeScript Services:
   - 49 fee calculation tests (all passing)
   - 30+ auth tests
   - 25+ security tests
   - Database integration tests
-  
+
 Performance:
   - <1μs matching latency
   - 1M+ orders/second
@@ -566,7 +566,7 @@ Admin (5):
   - Metrics
 ```
 
-**See:** [openapi.json](dotmx-backend/docs/openapi.json)
+**See:** [openapi.json](dotmx-backend/docs/reference/openapi.json)
 
 ---
 
@@ -589,32 +589,32 @@ Admin (5):
 
 ## 16. What Stayed the Same
 
-✅ **Core matching engine design** (price-time priority, Rust)  
-✅ **ElysiaJS for API layer**  
-✅ **PostgreSQL for persistence**  
-✅ **NATS for messaging**  
-✅ **Event sourcing architecture**  
-✅ **Sharding strategy**  
-✅ **Kong as API gateway**  
+✅ **Core matching engine design** (price-time priority, Rust)
+✅ **ElysiaJS for API layer**
+✅ **PostgreSQL for persistence**
+✅ **NATS for messaging**
+✅ **Event sourcing architecture**
+✅ **Sharding strategy**
+✅ **Kong as API gateway**
 
 ---
 
 ## 17. Lessons Learned
 
 ### Scope Expansion
-**Original:** Minimal viable exchange  
+**Original:** Minimal viable exchange
 **Reality:** Production exchanges need comprehensive features
 
 **Takeaway:** Don't underestimate authentication, security, and compliance requirements.
 
 ### Fee Competitiveness
-**Original:** Simple fee structure  
+**Original:** Simple fee structure
 **Reality:** Must match Binance/Bybit to compete
 
 **Takeaway:** Fee structure is a key competitive differentiator.
 
 ### Documentation Importance
-**Original:** Code is the documentation  
+**Original:** Code is the documentation
 **Reality:** APIs need formal documentation
 
 **Takeaway:** OpenAPI/Swagger is table stakes for developer experience.
@@ -668,17 +668,17 @@ Read these docs in order:
 
 ## 20. Questions & Contact
 
-**Why so many changes?**  
+**Why so many changes?**
 Original design was pre-market research. Implementation incorporated competitive analysis and user requirements discovered during development.
 
-**Is the original design obsolete?**  
+**Is the original design obsolete?**
 No. Core architecture (matching engine, sharding, event sourcing) remains unchanged. Features were added, not replaced.
 
-**Can I see the original design?**  
+**Can I see the original design?**
 Yes. See Git history or docs dated before November 2025.
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** January 20, 2026  
+**Document Version:** 1.0
+**Last Updated:** January 20, 2026
 **Next Review:** After Q1 2026 launch

@@ -1,6 +1,6 @@
 # DotMX v3 Platform - Module Status & Feature Checklist
 
-**Last Updated:** February 8, 2026  
+**Last Updated:** February 8, 2026
 **Overall Status:** 🟢 Production Ready (v3 Release)
 
 ---
@@ -665,14 +665,14 @@ See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) for deployment checklist:
 
 ## 📞 REFERENCES
 
-- **Rust Engine Details:** [rust-engine/PRODUCTION_READINESS.md](rust-engine/PRODUCTION_READINESS.md)
-- **Production Checklist:** [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)
-- **Deployment Guide:** [docs/operations/DEPLOYMENT.md](docs/operations/DEPLOYMENT.md)
+- **Rust Engine Details:** [../../dotmx-backend/rust-engine/README.md](../../dotmx-backend/rust-engine/README.md)
+- **Production Checklist:** [../../dotmx-backend/docs/operations/PRODUCTION_CHECKLIST.md](../../dotmx-backend/docs/operations/PRODUCTION_CHECKLIST.md)
+- **Deployment Guide:** [../../dotmx-backend/docs/operations/DEPLOYMENT.md](../../dotmx-backend/docs/operations/DEPLOYMENT.md)
 - **Database Tasks:** [REFACTORING_TASKS.md](REFACTORING_TASKS.md)
-- **API Documentation:** [docs/api/API.md](docs/api/API.md)
-- **System Architecture:** [docs/architecture/System-Overview.md](docs/architecture/System-Overview.md)
+- **API Documentation:** [../../dotmx-backend/docs/api/API.md](../../dotmx-backend/docs/api/API.md)
+- **System Architecture:** [../../dotmx-backend/docs/architecture/System-Overview.md](../../dotmx-backend/docs/architecture/System-Overview.md)
 
 ---
 
-**Last Review:** February 8, 2026  
+**Last Review:** February 8, 2026
 **Next Review:** Weekly until production launch

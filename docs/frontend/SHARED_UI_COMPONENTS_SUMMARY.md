@@ -6,7 +6,7 @@ I've created a comprehensive, reusable UI component library based on your Securi
 
 ## 📦 What Was Created
 
-### 1. **10 New Component Files** (in `/src/components/ui/`)
+### 1. **10 New Component Files** (in `dotmx-frontend/src/components/ui/`)
 
 | Component             | File                | Purpose                                              |
 | --------------------- | ------------------- | ---------------------------------------------------- |
@@ -23,9 +23,9 @@ I've created a comprehensive, reusable UI component library based on your Securi
 
 ### 2. **Documentation Files**
 
-- `SHARED_COMPONENTS.md` - Complete documentation with examples
-- `QUICK_REFERENCE.md` - Quick reference for common patterns
-- `NEW_COMPONENTS.md` - Overview of new components
+- `docs/frontend/ui-components/SHARED_COMPONENTS.md` - Complete documentation with examples
+- `docs/frontend/ui-components/QUICK_REFERENCE.md` - Quick reference for common patterns
+- `docs/frontend/ui-components/NEW_COMPONENTS.md` - Overview of new components
 
 ### 3. **Demo Page**
 
@@ -188,18 +188,18 @@ Dialog overlays:
 
 ## 🎯 Key Features
 
-✅ **Fully Typed** - Complete TypeScript support  
-✅ **Accessible** - ARIA labels and keyboard navigation  
-✅ **Responsive** - Mobile-first design with lg: breakpoints  
-✅ **Consistent** - Same theme as Security Page throughout  
-✅ **Flexible** - Variants for different use cases  
-✅ **Documented** - Comprehensive docs and examples  
+✅ **Fully Typed** - Complete TypeScript support
+✅ **Accessible** - ARIA labels and keyboard navigation
+✅ **Responsive** - Mobile-first design with lg: breakpoints
+✅ **Consistent** - Same theme as Security Page throughout
+✅ **Flexible** - Variants for different use cases
+✅ **Documented** - Comprehensive docs and examples
 ✅ **Production Ready** - No errors, tested and working
 
 ## 📁 File Structure
 
 ```
-src/components/ui/
+dotmx-frontend/src/components/ui/
 ├── StatusBanner.tsx          # Status banners with scores
 ├── Alert.tsx                 # Inline alerts
 ├── GradientCard.tsx          # Gradient cards
@@ -210,12 +210,14 @@ src/components/ui/
 ├── Loader.tsx                # Loading spinners
 ├── ProgressBar.tsx           # Progress indicators
 ├── InfoBox.tsx               # Info displays
-├── index.ts                  # Exports all components
+└── index.ts                  # Exports all components
+
+docs/frontend/ui-components/
 ├── SHARED_COMPONENTS.md      # Full documentation
 ├── QUICK_REFERENCE.md        # Quick reference
 └── NEW_COMPONENTS.md         # Overview
 
-src/app/portal/
+dotmx-frontend/src/app/portal/
 └── components-showcase/
     └── page.tsx              # Live demo page
 ```
@@ -251,7 +253,7 @@ These components work alongside your existing UI components:
 ## 🎊 Next Steps
 
 1. **View the showcase**: Visit `/portal/components-showcase`
-2. **Read the docs**: Check out `SHARED_COMPONENTS.md`
+2. **Read the docs**: Check out `docs/frontend/ui-components/SHARED_COMPONENTS.md`
 3. **Start using**: Import and use in your pages
 4. **Customize**: Extend components as needed
 

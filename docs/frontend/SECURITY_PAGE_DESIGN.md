@@ -7,7 +7,7 @@ The security page has been refactored from a single 1142-line file into a modula
 ## File Structure
 
 ```
-src/app/portal/security/
+dotmx-frontend/src/app/portal/security/
 ├── page.tsx              (404 lines) - Main orchestration
 ├── utils.ts              (90 lines)  - Utility functions
 ├── page-old.tsx          (1142 lines) - Backup of original file

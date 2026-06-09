@@ -46,10 +46,10 @@ docker compose up -d
 
 ## 📚 Documentation
 
-- **[PRODUCTION_CONFIG.md](PRODUCTION_CONFIG.md)** - Complete configuration summary
-- **[PRODUCTION_SETUP.md](PRODUCTION_SETUP.md)** - Detailed setup guide
-- **[PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md)** - Pre-deployment checklist
-- **[ARCHITECTURE_DIAGRAM.txt](ARCHITECTURE_DIAGRAM.txt)** - System architecture
+- **[PRODUCTION_CONFIG.md](../../dotmx-backend/docs/operations/PRODUCTION_CONFIG.md)** - Complete configuration summary
+- **[PRODUCTION_SETUP.md](../../dotmx-backend/docs/operations/PRODUCTION_SETUP.md)** - Detailed setup guide
+- **[PRODUCTION_CHECKLIST.md](../../dotmx-backend/docs/operations/PRODUCTION_CHECKLIST.md)** - Pre-deployment checklist
+- **[ARCHITECTURE_DIAGRAM.txt](../../dotmx-backend/docs/architecture/ARCHITECTURE_DIAGRAM.txt)** - System architecture
 
 ## 🔒 Security Tasks (IMPORTANT!)
 
@@ -61,7 +61,7 @@ Before deploying to production:
 4. ⚠️ **Update CORS origins** to your domains
 5. ⚠️ **Remove demo consumers** from Kong config
 
-See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) for complete list.
+See [PRODUCTION_CHECKLIST.md](../../dotmx-backend/docs/operations/PRODUCTION_CHECKLIST.md) for complete list.
 
 ## 🧪 Test Configuration
 

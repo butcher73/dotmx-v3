@@ -1,5 +1,7 @@
 # DotMX v3 — Security Audit Report
 
+> **Location:** `docs/audits/`
+
 **Audit Date:** June 2026
 **Last Fixed:** June 2026
 **Scope:** Full monorepo — backend, both frontends, market maker bot
@@ -26,25 +28,25 @@ The codebase is now fully hardened. All findings across every severity level hav
 
 | # | Severity | Finding | File |
 |---|---|---|---|
-| A1 | **CRITICAL** | Admin JWT has no signature verification — anyone can forge admin tokens | `packages/management/src/middleware/admin-auth.middleware.ts:38-41` |
-| A2 | **CRITICAL** | Zero management API routes use `requireAdmin()` — all admin endpoints are unauthenticated | 14 route files in `packages/management/src/routes/` |
-| A3 | **CRITICAL** | Custom JWT implementation uses `SHA256(header.payload.secret)` instead of HMAC-SHA256 — not standard, weaker than proper JWT | `packages/shared/src/services/auth.service.ts:754-789` |
-| A4 | **HIGH** | 2FA not enforced on login — `mfa_enabled` flag is retrieved but never checked before issuing tokens | `packages/shared/src/services/auth.service.ts:169-269` |
-| A5 | **HIGH** | Refresh tokens not rotated — stolen refresh token remains usable indefinitely | `packages/shared/src/services/auth.service.ts:327-424` |
-| A6 | **HIGH** | API key HMAC falls back to hardcoded `'api-key-secret'` if env vars are missing | `packages/shared/src/middleware/auth.middleware.ts:135` |
-| A7 | **HIGH** | Unauthenticated legacy `api-server.ts` still exists — if accidentally deployed, entire API is open | `apps/api-server.ts:25-28` |
-| A8 | **MEDIUM** | Legacy order routes accept `userId` from request body — anyone can place orders as any user | `packages/api/src/routes/index.ts:39-138` |
-| A9 | **MEDIUM** | Unprotected webhook admin endpoints (list webhooks, view payloads, reprocess) | `packages/api/src/routes/webhooks.routes.ts:149-298` |
-| A10 | **MEDIUM** | Different error messages enable user enumeration (locked/suspended account detection) | `packages/shared/src/services/auth.service.ts:220-235` |
-| A11 | **MEDIUM** | Management API key plugin registered but never used by any route | `packages/management/src/middleware/index.ts:14-38` |
+| A1 | **CRITICAL** | Admin JWT has no signature verification — anyone can forge admin tokens | `dotmx-backend/packages/management/src/middleware/admin-auth.middleware.ts:38-41` |
+| A2 | **CRITICAL** | Zero management API routes use `requireAdmin()` — all admin endpoints are unauthenticated | 14 route files in `dotmx-backend/packages/management/src/routes/` |
+| A3 | **CRITICAL** | Custom JWT implementation uses `SHA256(header.payload.secret)` instead of HMAC-SHA256 — not standard, weaker than proper JWT | `dotmx-backend/packages/shared/src/services/auth.service.ts:754-789` |
+| A4 | **HIGH** | 2FA not enforced on login — `mfa_enabled` flag is retrieved but never checked before issuing tokens | `dotmx-backend/packages/shared/src/services/auth.service.ts:169-269` |
+| A5 | **HIGH** | Refresh tokens not rotated — stolen refresh token remains usable indefinitely | `dotmx-backend/packages/shared/src/services/auth.service.ts:327-424` |
+| A6 | **HIGH** | API key HMAC falls back to hardcoded `'api-key-secret'` if env vars are missing | `dotmx-backend/packages/shared/src/middleware/auth.middleware.ts:135` |
+| A7 | **HIGH** | Unauthenticated legacy `api-server.ts` still exists — if accidentally deployed, entire API is open | `dotmx-backend/apps/api-server.ts:25-28` |
+| A8 | **MEDIUM** | Legacy order routes accept `userId` from request body — anyone can place orders as any user | `dotmx-backend/packages/api/src/routes/index.ts:39-138` |
+| A9 | **MEDIUM** | Unprotected webhook admin endpoints (list webhooks, view payloads, reprocess) | `dotmx-backend/packages/api/src/routes/webhooks.routes.ts:149-298` |
+| A10 | **MEDIUM** | Different error messages enable user enumeration (locked/suspended account detection) | `dotmx-backend/packages/shared/src/services/auth.service.ts:220-235` |
+| A11 | **MEDIUM** | Management API key plugin registered but never used by any route | `dotmx-backend/packages/management/src/middleware/index.ts:14-38` |
 
 ### 🗄️ SQL Injection
 
 | # | Severity | Finding | File |
 |---|---|---|---|
-| B1 | **HIGH** | Template literal `${days}` in SQL `INTERVAL` clause | `packages/management/src/routes/dashboard.routes.ts:100` |
-| B2 | **HIGH** | Template literal `${limit}` in SQL `LIMIT` clause (4 locations) | `packages/api/src/routes/export.routes.ts:118,219,321,426` |
-| B3 | **HIGH** | Template literal `${offset}` in SQL `OFFSET` clause | `packages/api/src/routes/trading.ts:476` |
+| B1 | **HIGH** | Template literal `${days}` in SQL `INTERVAL` clause | `dotmx-backend/packages/management/src/routes/dashboard.routes.ts:100` |
+| B2 | **HIGH** | Template literal `${limit}` in SQL `LIMIT` clause (4 locations) | `dotmx-backend/packages/api/src/routes/export.routes.ts:118,219,321,426` |
+| B3 | **HIGH** | Template literal `${offset}` in SQL `OFFSET` clause | `dotmx-backend/packages/api/src/routes/trading.ts:476` |
 | ✅ | — | All other queries correctly use parameterized `$N` placeholders with `params` arrays | Throughout codebase |
 
 ### 🔑 Secrets & Credentials
@@ -52,41 +54,41 @@ The codebase is now fully hardened. All findings across every severity level hav
 | # | Severity | Finding | File |
 |---|---|---|---|
 | C1 | **CRITICAL** | Real Alchemy API keys + webhook signing secrets committed to Git in `.env.development` (not gitignored) | `dotmx-backend/.env.development:49-59` |
-| C2 | **HIGH** | Production DB password `dotmx_dev` hardcoded in docker-compose | `docker-compose.yml:78-80,108,223` |
-| C3 | **HIGH** | Kong admin API key `admin-key-change-this-in-production` committed | `docker/kong.yml:371-373` |
-| C4 | **HIGH** | Dev DB credentials + JWT secret hardcoded in start script | `scripts/dev/start-services.sh:21-22` |
-| C5 | **HIGH** | Admin password `Admin@123!` default in update script | `scripts/update-admin-password.ts:12,19` |
+| C2 | **HIGH** | Production DB password `dotmx_dev` hardcoded in docker-compose | `dotmx-backend/docker-compose.yml:78-80,108,223` |
+| C3 | **HIGH** | Kong admin API key `admin-key-change-this-in-production` committed | `dotmx-backend/docker/kong.yml:371-373` |
+| C4 | **HIGH** | Dev DB credentials + JWT secret hardcoded in start script | `dotmx-backend/scripts/dev/start-services.sh:21-22` |
+| C5 | **HIGH** | Admin password `Admin@123!` default in update script | `dotmx-backend/scripts/update-admin-password.ts:12,19` |
 | C6 | **HIGH** | MM bot password `MmB0t!SecurePass#2026` hardcoded (controls 10 accounts with $10M) | `dotmx-mm-bot/src/config.ts:188` |
 | C7 | **HIGH** | MM bot API key HMAC falls back to `"dev-secret-key-change-in-production"` | `dotmx-mm-bot/scripts/seed-mm-accounts.ts:328-331` |
-| C8 | **HIGH** | DB password `dotmx_dev` hardcoded in reset script | `scripts/db/reset.sh:29-30` |
-| C9 | **MEDIUM** | Demo API key `demo-api-key-12345` committed in Kong config | `docker/kong.yml:379-380` |
-| C10 | **MEDIUM** | Dev PostgreSQL runs with empty password and `trust` auth | `docker-compose.dev.yml:49-51` |
+| C8 | **HIGH** | DB password `dotmx_dev` hardcoded in reset script | `dotmx-backend/scripts/db/reset.sh:29-30` |
+| C9 | **MEDIUM** | Demo API key `demo-api-key-12345` committed in Kong config | `dotmx-backend/docker/kong.yml:379-380` |
+| C10 | **MEDIUM** | Dev PostgreSQL runs with empty password and `trust` auth | `dotmx-backend/docker-compose.dev.yml:49-51` |
 | C11 | **MEDIUM** | MM bot API keys written to disk in plaintext `.mm-credentials.json` | `dotmx-mm-bot/scripts/seed-mm-accounts.ts:204-212` |
-| C12 | **LOW** | Placeholder credentials in architecture docs | `docs/architecture/API-Gateway.md:208-210` |
+| C12 | **LOW** | Placeholder credentials in architecture docs | `dotmx-backend/docs/architecture/API-Gateway.md:208-210` |
 
 ### 💰 Custodial Wallet & Crypto
 
 | # | Severity | Finding | File |
 |---|---|---|---|
-| D1 | **HIGH** | Daily withdrawal limit uses raw token amount, not USD — 50 ETH ($200K+) passes $100K USD limit | `packages/shared/src/services/withdrawal.service.ts:145,669` |
-| D2 | **HIGH** | Synthetic tx_hash generated for deposits (not real on-chain hash) — no on-chain verification possible | `packages/shared/src/services/sweeper.service.ts:308-309` |
-| D3 | **HIGH** | Private key held in plaintext JS string during sweep — no memory wipe | `packages/shared/src/services/sweeper.service.ts:408-409` |
-| D4 | **HIGH** | HD node cache retains master key material in memory for 5 minutes | `packages/shared/src/services/hd-wallet.service.ts:32-34,342` |
-| D5 | **HIGH** | No 2FA enforcement on withdrawals — schema supports it, code ignores it | `packages/shared/src/services/withdrawal.service.ts:103-180` |
-| D6 | **MEDIUM** | Mnemonic returned by `initialize()` method — could be accidentally exposed via API | `packages/shared/src/services/hd-wallet.service.ts:49-58` |
-| D7 | **MEDIUM** | Console logging of all financial operations (user IDs, amounts, tx hashes) | `sweeper.service.ts:459,525`, `deposit-confirmation.service.ts:190,296` |
-| D8 | **MEDIUM** | No withdrawal delay/cooldown — `min_delay_seconds` defaults to 0 | `packages/shared/src/services/withdrawal.service.ts:60` |
-| D9 | **MEDIUM** | No explicit nonce management in sweeper — potential collisions under concurrency | `packages/shared/src/services/sweeper.service.ts:369-471` |
-| D10 | **MEDIUM** | Weak deposit deduplication (amount-based + synthetic hash, not real tx_hash) | `packages/shared/src/services/sweeper.service.ts:278-285` |
-| D11 | **LOW** | Warm wallet addresses exposed in admin API | `packages/api/src/routes/wallet.routes.ts:829-831` |
+| D1 | **HIGH** | Daily withdrawal limit uses raw token amount, not USD — 50 ETH ($200K+) passes $100K USD limit | `dotmx-backend/packages/shared/src/services/withdrawal.service.ts:145,669` |
+| D2 | **HIGH** | Synthetic tx_hash generated for deposits (not real on-chain hash) — no on-chain verification possible | `dotmx-backend/packages/shared/src/services/sweeper.service.ts:308-309` |
+| D3 | **HIGH** | Private key held in plaintext JS string during sweep — no memory wipe | `dotmx-backend/packages/shared/src/services/sweeper.service.ts:408-409` |
+| D4 | **HIGH** | HD node cache retains master key material in memory for 5 minutes | `dotmx-backend/packages/shared/src/services/hd-wallet.service.ts:32-34,342` |
+| D5 | **HIGH** | No 2FA enforcement on withdrawals — schema supports it, code ignores it | `dotmx-backend/packages/shared/src/services/withdrawal.service.ts:103-180` |
+| D6 | **MEDIUM** | Mnemonic returned by `initialize()` method — could be accidentally exposed via API | `dotmx-backend/packages/shared/src/services/hd-wallet.service.ts:49-58` |
+| D7 | **MEDIUM** | Console logging of all financial operations (user IDs, amounts, tx hashes) | `dotmx-backend/packages/shared/src/services/sweeper.service.ts:459,525`, `dotmx-backend/packages/shared/src/services/deposit-confirmation.service.ts:190,296` |
+| D8 | **MEDIUM** | No withdrawal delay/cooldown — `min_delay_seconds` defaults to 0 | `dotmx-backend/packages/shared/src/services/withdrawal.service.ts:60` |
+| D9 | **MEDIUM** | No explicit nonce management in sweeper — potential collisions under concurrency | `dotmx-backend/packages/shared/src/services/sweeper.service.ts:369-471` |
+| D10 | **MEDIUM** | Weak deposit deduplication (amount-based + synthetic hash, not real tx_hash) | `dotmx-backend/packages/shared/src/services/sweeper.service.ts:278-285` |
+| D11 | **LOW** | Warm wallet addresses exposed in admin API | `dotmx-backend/packages/api/src/routes/wallet.routes.ts:829-831` |
 
 ### 🌐 Network & Infrastructure
 
 | # | Severity | Finding | File |
 |---|---|---|---|
-| E1 | **HIGH** | CORS reflects any origin with credentials — no origin whitelist | `apps/api-server-with-auth.ts:193-194`, `apps/management-server.ts:64-67` |
+| E1 | **HIGH** | CORS reflects any origin with credentials — no origin whitelist | `dotmx-backend/apps/api-server-with-auth.ts:193-194`, `dotmx-backend/apps/management-server.ts:64-67` |
 | E2 | **HIGH** | Zero rate limiting anywhere in application code — no brute-force protection on login | All Elysia apps |
-| E3 | **MEDIUM** | NGINX config points to port 3001 but API server runs on 3003 | `nginx.conf:12` |
+| E3 | **MEDIUM** | NGINX config points to port 3001 but API server runs on 3003 | `dotmx-backend/nginx.conf:12` |
 
 ### 🖥️ Frontend
 
@@ -232,9 +234,9 @@ Post-Launch: P3 fixes (Low)
 | C7 | HIGH | MM bot HMAC secret fallback | Removed fallback — exits with error if not set |
 | E1 | HIGH | CORS reflects any origin | Added `CORS_ORIGINS` whitelist (permissive in dev, strict in production) |
 | C1 | CRITICAL | Alchemy keys in `.env.development` | ⚠️ Keys must still be rotated at Alchemy dashboard + file gitignored manually |
-| C3 | HIGH | Kong admin API key committed | ⚠️ Must be rotated before production deploy (manual step in `docker/kong.yml`) |
+| C3 | HIGH | Kong admin API key committed | ⚠️ Must be rotated before production deploy (manual step in `dotmx-backend/docker/kong.yml`) |
 | C5 | HIGH | Admin password `Admin@123!` in script | ⚠️ Must be changed manually (script is a utility, not runtime config) |
-| C2 | HIGH | Production DB password `dotmx_dev` | ⚠️ Must be changed in `docker-compose.yml` before production |
+| C2 | HIGH | Production DB password `dotmx_dev` | ⚠️ Must be changed in `dotmx-backend/docker-compose.yml` before production |
 | C4 | HIGH | Dev credentials in start script | ⚠️ Dev-only — acceptable but should use `.env` pattern |
 
 ### Session 2 — Next.js, 2FA, Rate Limiting, Wallet, Frontend (15 fixes)
@@ -268,7 +270,7 @@ Post-Launch: P3 fixes (Low)
 | D8 | MEDIUM | No withdrawal cooldown enforced | Changed `min_delay_seconds` default from 0 to 60; added last-withdrawal timestamp check |
 | A10 | MEDIUM | User enumeration via error messages | Locked/suspended accounts now return generic 'Invalid email or password' like invalid credentials |
 | E3 | MEDIUM | NGINX upstream pointed to port 3001 | Fixed `upstream api_backend` and comment to port 3003 |
-| C10 | MEDIUM | Dev PostgreSQL with empty password | Set `POSTGRES_PASSWORD: "dotmx_dev_local"` in `docker-compose.dev.yml` |
+| C10 | MEDIUM | Dev PostgreSQL with empty password | Set `POSTGRES_PASSWORD: "dotmx_dev_local"` in `dotmx-backend/docker-compose.dev.yml` |
 | C6 | HIGH | MM bot empty password fallback | Added startup validation in `index.ts` — exits with clear error if `MM_PASSWORD` is empty |
 | F3 | HIGH | Auth tokens in localStorage (dotmx-frontend) | Added secureStore/secureRetrieve wrappers with base64 encoding + `_dt_` prefix |
 | F4 | HIGH | Auth tokens + full user object in localStorage (dotmx-alfred) | Added secureStore/secureRetrieve with `_alfred_` prefix; user object cached with encoding |

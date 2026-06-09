@@ -1,5 +1,7 @@
 # Database Schema Migration Audit Report
 
+> **Location:** `docs/audits/`
+
 ## Schema Changes Reference
 
 | Old | New |
@@ -35,7 +37,7 @@
 
 ---
 
-## 1. `packages/api/src/routes/assets.routes.ts` (1436 lines)
+## 1. `dotmx-backend/packages/api/src/routes/assets.routes.ts` (1436 lines)
 
 **STATUS: 🔴 CRITICAL — Most broken file. Mixes old AND new schema names.**
 
@@ -77,7 +79,7 @@
 
 ---
 
-## 2. `packages/api/src/routes/wallet.routes.ts` (909 lines)
+## 2. `dotmx-backend/packages/api/src/routes/wallet.routes.ts` (909 lines)
 
 **STATUS: 🔴 CRITICAL**
 
@@ -91,7 +93,7 @@
 
 ---
 
-## 3. `packages/api/src/routes/trading-advanced.routes.ts` (513 lines)
+## 3. `dotmx-backend/packages/api/src/routes/trading-advanced.routes.ts` (513 lines)
 
 **STATUS: 🟡 WARNING**
 
@@ -101,7 +103,7 @@
 
 ---
 
-## 4. `packages/api/src/routes/export.routes.ts` (484 lines)
+## 4. `dotmx-backend/packages/api/src/routes/export.routes.ts` (484 lines)
 
 **STATUS: 🟡 WARNING**
 
@@ -111,7 +113,7 @@
 
 ---
 
-## 5. `packages/api/src/routes/positions.routes.ts`
+## 5. `dotmx-backend/packages/api/src/routes/positions.routes.ts`
 
 **STATUS: 🟡 WARNING**
 
@@ -121,7 +123,7 @@
 
 ---
 
-## 6. `packages/api/src/routes/auth.routes.ts` (1134 lines)
+## 6. `dotmx-backend/packages/api/src/routes/auth.routes.ts` (1134 lines)
 
 **STATUS: 🟢 MOSTLY OK**
 
@@ -143,7 +145,7 @@
 
 ---
 
-## 8. `packages/shared/src/services/alchemy-webhook.service.ts` (648 lines)
+## 8. `dotmx-backend/packages/shared/src/services/alchemy-webhook.service.ts` (648 lines)
 
 **STATUS: 🔴 CRITICAL**
 
@@ -159,7 +161,7 @@
 
 ---
 
-## 9. `packages/shared/src/services/hd-wallet.service.ts` (403 lines)
+## 9. `dotmx-backend/packages/shared/src/services/hd-wallet.service.ts` (403 lines)
 
 **STATUS: 🔴 CRITICAL**
 
@@ -173,7 +175,7 @@
 
 ---
 
-## 10. `packages/shared/src/services/sweeper.service.ts` (636 lines)
+## 10. `dotmx-backend/packages/shared/src/services/sweeper.service.ts` (636 lines)
 
 **STATUS: 🔴 CRITICAL**
 
@@ -193,7 +195,7 @@
 
 ---
 
-## 11. `packages/shared/src/services/deposit-confirmation.service.ts` (328 lines)
+## 11. `dotmx-backend/packages/shared/src/services/deposit-confirmation.service.ts` (328 lines)
 
 **STATUS: 🔴 CRITICAL**
 
@@ -206,7 +208,7 @@
 
 ---
 
-## 12. `packages/shared/src/services/withdrawal.service.ts` (733 lines)
+## 12. `dotmx-backend/packages/shared/src/services/withdrawal.service.ts` (733 lines)
 
 **STATUS: 🔴 CRITICAL**
 
@@ -221,7 +223,7 @@
 
 ---
 
-## 13. `packages/management/src/routes/chains.routes.ts` (entire file)
+## 13. `dotmx-backend/packages/management/src/routes/chains.routes.ts` (entire file)
 
 **STATUS: 🔴 CRITICAL — Every query references old `chains` table**
 
@@ -239,7 +241,7 @@
 
 ---
 
-## 14. `packages/management/src/routes/tokens.routes.ts` (673 lines)
+## 14. `dotmx-backend/packages/management/src/routes/tokens.routes.ts` (673 lines)
 
 **STATUS: 🔴 CRITICAL — Every query references old `tokens` / `token_chains` tables**
 
@@ -261,7 +263,7 @@
 
 ---
 
-## 15. `packages/management/src/routes/deposits-withdrawals.routes.ts` (837 lines)
+## 15. `dotmx-backend/packages/management/src/routes/deposits-withdrawals.routes.ts` (837 lines)
 
 **STATUS: 🟡 WARNING — Uses database views (which may hide the old schema)**
 
@@ -274,7 +276,7 @@
 
 ---
 
-## 16. `packages/management/src/routes/transactions.routes.ts`
+## 16. `dotmx-backend/packages/management/src/routes/transactions.routes.ts`
 
 **STATUS: 🔴 CRITICAL**
 
@@ -285,7 +287,7 @@
 
 ---
 
-## 17. `packages/management/src/routes/users.routes.ts` (585 lines)
+## 17. `dotmx-backend/packages/management/src/routes/users.routes.ts` (585 lines)
 
 **STATUS: 🔴 CRITICAL**
 
@@ -299,7 +301,7 @@
 
 ---
 
-## 18. `packages/management/src/routes/dashboard.routes.ts`
+## 18. `dotmx-backend/packages/management/src/routes/dashboard.routes.ts`
 
 **STATUS: 🔴 CRITICAL — Uses non-existent table names**
 
@@ -326,7 +328,7 @@
 
 ---
 
-## 20. `packages/shared/src/types/custodial-wallet.ts`
+## 20. `dotmx-backend/packages/shared/src/types/custodial-wallet.ts`
 
 **STATUS: ⚪ INFO — Type definitions with old naming patterns**
 
@@ -381,20 +383,20 @@
 
 ## Priority Fix Order
 
-1. **`packages/management/src/routes/chains.routes.ts`** — Rename to `networks.routes.ts`, change all SQL
-2. **`packages/management/src/routes/tokens.routes.ts`** — Rename to `assets.routes.ts`, change all SQL
-3. **`packages/api/src/routes/assets.routes.ts`** — Most complex; ~30+ broken references
-4. **`packages/shared/src/services/sweeper.service.ts`** — ~15 broken references
-5. **`packages/shared/src/services/alchemy-webhook.service.ts`** — ~10 broken references
-6. **`packages/shared/src/services/hd-wallet.service.ts`** — ~8 broken references
-7. **`packages/shared/src/services/withdrawal.service.ts`** — ~8 broken references
-8. **`packages/shared/src/services/deposit-confirmation.service.ts`** — ~5 broken references
-9. **`packages/api/src/routes/wallet.routes.ts`** — ~5 broken references
-10. **`packages/management/src/routes/dashboard.routes.ts`** — Wrong table names entirely
-11. **`packages/management/src/routes/users.routes.ts`** — ~5 broken references
-12. **`packages/management/src/routes/transactions.routes.ts`** — 2 broken table names
-13. **`packages/management/src/routes/deposits-withdrawals.routes.ts`** — DB views + 1 direct reference
-14. **`packages/shared/src/types/custodial-wallet.ts`** — Type definitions needing alignment
+1. **`dotmx-backend/packages/management/src/routes/chains.routes.ts`** — Rename to `networks.routes.ts`, change all SQL
+2. **`dotmx-backend/packages/management/src/routes/tokens.routes.ts`** — Rename to `assets.routes.ts`, change all SQL
+3. **`dotmx-backend/packages/api/src/routes/assets.routes.ts`** — Most complex; ~30+ broken references
+4. **`dotmx-backend/packages/shared/src/services/sweeper.service.ts`** — ~15 broken references
+5. **`dotmx-backend/packages/shared/src/services/alchemy-webhook.service.ts`** — ~10 broken references
+6. **`dotmx-backend/packages/shared/src/services/hd-wallet.service.ts`** — ~8 broken references
+7. **`dotmx-backend/packages/shared/src/services/withdrawal.service.ts`** — ~8 broken references
+8. **`dotmx-backend/packages/shared/src/services/deposit-confirmation.service.ts`** — ~5 broken references
+9. **`dotmx-backend/packages/api/src/routes/wallet.routes.ts`** — ~5 broken references
+10. **`dotmx-backend/packages/management/src/routes/dashboard.routes.ts`** — Wrong table names entirely
+11. **`dotmx-backend/packages/management/src/routes/users.routes.ts`** — ~5 broken references
+12. **`dotmx-backend/packages/management/src/routes/transactions.routes.ts`** — 2 broken table names
+13. **`dotmx-backend/packages/management/src/routes/deposits-withdrawals.routes.ts`** — DB views + 1 direct reference
+14. **`dotmx-backend/packages/shared/src/types/custodial-wallet.ts`** — Type definitions needing alignment
 
 ---
 

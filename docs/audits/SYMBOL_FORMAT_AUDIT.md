@@ -1,12 +1,14 @@
 # Symbol Format Audit Report
 
-> **Date**: 2026-02-09  
-> **Scope**: `dotmx-frontend/` and `dotmx-backend/` codebases  
+> **Location:** `docs/audits/`
+
+> **Date**: 2026-02-09
+> **Scope**: `dotmx-frontend/` and `dotmx-backend/` codebases
 > **Formats identified**:
-> - **Slash** `BTC/USDT` — database canonical format  
-> - **Dash** `BTC-USD` or `BTC-USDC` — frontend internal/display format  
-> - **Flat** `BTCUSDT` — Bitget API & WS subscription format  
-> - **Suffixed** `BTCUSDT_UMCBL` — legacy Bitget v1 futures identifier  
+> - **Slash** `BTC/USDT` — database canonical format
+> - **Dash** `BTC-USD` or `BTC-USDC` — frontend internal/display format
+> - **Flat** `BTCUSDT` — Bitget API & WS subscription format
+> - **Suffixed** `BTCUSDT_UMCBL` — legacy Bitget v1 futures identifier
 
 ---
 
@@ -471,10 +473,10 @@
 
 1. **Standardize on slash format as canonical** — match the database
 2. **Create a shared `@dotmx/symbol-utils` package** with:
-   - `toSlash("BTC-USD") → "BTC/USD"`  
-   - `toDash("BTC/USD") → "BTC-USD"`  
-   - `toFlat("BTC/USD") → "BTCUSD"`  
-   - `toBitget("BTC/USD") → "BTCUSDT"`  
+   - `toSlash("BTC-USD") → "BTC/USD"`
+   - `toDash("BTC/USD") → "BTC-USD"`
+   - `toFlat("BTC/USD") → "BTCUSD"`
+   - `toBitget("BTC/USD") → "BTCUSDT"`
    - `normalize(anyFormat) → canonical`
 3. **Fix orders.symbol** to store slash format matching `trading_pairs`
 4. **Unify collateral naming** — decide on `USD` vs `USDT` vs `USDC`

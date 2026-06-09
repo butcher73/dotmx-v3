@@ -1,5 +1,7 @@
 # DotMX v3 — Business Logic Audit #2 (Post-Fix Analysis)
 
+> **Location:** `docs/audits/`
+
 **Audit Date:** June 2026 (2nd pass)
 **Scope:** Complete order-to-settlement flow, fees, liquidation, funding, deposits, withdrawals, auth, KYC
 **Status:** 57 unfixed bugs identified across all modules
@@ -25,7 +27,7 @@ The first security audit fixed 44 vulnerabilities. The first business logic audi
 
 ### BL1-NEW — 🔴 CRITICAL: Maker + Taker Fee Rates Both 0.1% (Wrong)
 
-**File:** `packages/shared/src/services/trade-settlement.service.ts:56-57`
+**File:** `dotmx-backend/packages/shared/src/services/trade-settlement.service.ts:56-57`
 
 ```typescript
 const makerFeeRate = 0.001;  // 0.1%
@@ -40,7 +42,7 @@ The TypeScript engine uses 0.2% taker. The perpetual fee config uses 0.035% take
 
 ### BL2-NEW — 🔴 CRITICAL: Settlement Is Fire-and-Forget
 
-**File:** `packages/gateway/src/adapter/index.ts:127-145`
+**File:** `dotmx-backend/packages/gateway/src/adapter/index.ts:127-145`
 
 ```typescript
 settlementService.settleTrade({...})
@@ -57,7 +59,7 @@ Trade events are dispatched to subscribers BEFORE settlement completes or even i
 
 ### BL3-NEW — 🟠 HIGH: Duplicate Fee Logic (Engine + Settlement)
 
-**File:** `packages/engine/src/matching/index.ts:208-229` (engine fees) + `trade-settlement.service.ts:56-57` (settlement fees)
+**File:** `dotmx-backend/packages/engine/src/matching/index.ts:208-229` (engine fees) + `dotmx-backend/packages/shared/src/services/trade-settlement.service.ts:56-57` (settlement fees)
 
 The engine calculates fees at 0.1%/0.2%, embeds them in Trade events, but the settlement service discards engine fees and recalculates at 0.1%/0.1%. Two different fee numbers exist for the same trade.
 
@@ -67,7 +69,7 @@ The engine calculates fees at 0.1%/0.2%, embeds them in Trade events, but the se
 
 ### BL4-NEW — 🟠 HIGH: Engine Events Never Reach Gateway in Production
 
-**File:** `apps/api-server-with-auth.ts:180-183` + `apps/engine-server.ts:86-113`
+**File:** `dotmx-backend/apps/api-server-with-auth.ts:180-183` + `dotmx-backend/apps/engine-server.ts:86-113`
 
 Both use `createMemoryCommandBus()` — separate in-memory instances in separate processes. Engine events are published to engine's command bus; gateway subscribes to its own command bus. Events never flow between them. The entire settlement pipeline is dead code in multi-process deployment.
 
@@ -77,7 +79,7 @@ Both use `createMemoryCommandBus()` — separate in-memory instances in separate
 
 ### BL5-NEW — 🟠 HIGH: Margin Locked AFTER Gateway Returns (Race)
 
-**File:** `packages/api/src/routes/trading-advanced.routes.ts:109-132`
+**File:** `dotmx-backend/packages/api/src/routes/trading-advanced.routes.ts:109-132`
 
 ```typescript
 const result = await gateway.placeOrder({...});  // engine matches → settlement fires
@@ -93,7 +95,7 @@ The engine can produce trades and settlement can deduct fees from `locked` BEFOR
 
 ### BL6-NEW — 🟠 HIGH: Market Orders Bypass Margin Check
 
-**File:** `packages/api/src/routes/trading-advanced.routes.ts:86-87`
+**File:** `dotmx-backend/packages/api/src/routes/trading-advanced.routes.ts:86-87`
 
 ```typescript
 const notional = body.quantity * (body.price ?? 0);  // 0 for MARKET orders
@@ -108,7 +110,7 @@ Market orders always pass with `requiredMargin = 0`.
 
 ### BL7-NEW — 🟠 HIGH: No VIP Tier or DMX Discount Integration
 
-**File:** `packages/shared/src/services/trade-settlement.service.ts:56`
+**File:** `dotmx-backend/packages/shared/src/services/trade-settlement.service.ts:56`
 
 The `FeeCalculationService` (715 lines, fully implemented with VIP tiers + DMX discounts) and `VIPTierService` (554 lines) exist but are never called. Every trade settles at flat 0.1% regardless of user tier.
 
@@ -116,7 +118,7 @@ The `FeeCalculationService` (715 lines, fully implemented with VIP tiers + DMX d
 
 ### BL8-NEW — 🟡 MEDIUM: Quote Asset Hardcoded to 'USDT'
 
-**File:** `packages/shared/src/services/trade-settlement.service.ts:139,174,199,209`
+**File:** `dotmx-backend/packages/shared/src/services/trade-settlement.service.ts:139,174,199,209`
 
 All fee deductions use hardcoded `'USDT'` as the asset. Trades on `ETH-BTC` or `SOL-USDC` pairs would deduct fees from the wrong asset.
 
@@ -124,7 +126,7 @@ All fee deductions use hardcoded `'USDT'` as the asset. Trades on `ETH-BTC` or `
 
 ### BL9-NEW — 🟡 MEDIUM: Maker Rebates Impossible (No Credit Path)
 
-**File:** `packages/shared/src/services/trade-settlement.service.ts:193-213`
+**File:** `dotmx-backend/packages/shared/src/services/trade-settlement.service.ts:193-213`
 
 `updateBalancesForFees()` only does `locked = GREATEST(locked - x, 0)` — it can deduct but never credit. High-tier makers with negative fee rates (rebates) never receive their rebates.
 
@@ -134,7 +136,7 @@ All fee deductions use hardcoded `'USDT'` as the asset. Trades on `ETH-BTC` or `
 
 ### BL12 — 🔴 CRITICAL: Liquidation Margin Multiplied by Leverage
 
-**File:** `packages/shared/src/services/perpetual-fee.service.ts:659`
+**File:** `dotmx-backend/packages/shared/src/services/perpetual-fee.service.ts:659`
 
 ```typescript
 const maintenanceMargin = positionNotional * 0.005 * leverage;  // WRONG
@@ -148,7 +150,7 @@ At 100x leverage: `notional * 0.5` — needs 50% margin. Liquidation triggers at
 
 ### BL16 — 🔴 CRITICAL: `position.increase()` Replaces Entire Margin
 
-**File:** `rust-engine/crates/dotmx-core/src/perpetual.rs:264`
+**File:** `dotmx-backend/rust-engine/crates/dotmx-core/src/perpetual.rs:264`
 
 ```rust
 self.margin = calculate_margin(self.entry_price, self.size, leverage);
@@ -160,7 +162,7 @@ Replaces the entire margin with a new calculation, losing the additional margin 
 
 ### BL17 — 🔴 CRITICAL: `position.decrease()` Margin Never Returned
 
-**File:** `rust-engine/crates/dotmx-core/src/perpetual.rs:275-298`
+**File:** `dotmx-backend/rust-engine/crates/dotmx-core/src/perpetual.rs:275-298`
 
 ```rust
 pub fn decrease(...) -> Decimal {
@@ -175,7 +177,7 @@ When closing part of a position, the released margin simply disappears. Users lo
 
 ### BL14 — 🔴 CRITICAL: Funding Payment Uses Entry Price
 
-**File:** `packages/ledger/src/services/index.ts:20`
+**File:** `dotmx-backend/packages/ledger/src/services/index.ts:20`
 
 ```typescript
 const notional = Math.abs(position.size) * position.entryPrice;  // WRONG
@@ -212,7 +214,7 @@ Funding should use current mark price. Entry price is fixed at open time. A BTC 
 
 ### BL20 — 🔴 CRITICAL: Withdrawal Fee Never Locked
 
-**File:** `packages/shared/src/services/withdrawal.service.ts:192,532`
+**File:** `dotmx-backend/packages/shared/src/services/withdrawal.service.ts:192,532`
 
 `lockBalance(amount)` locks only the principal. `completeWithdrawal` deducts `amount + fee` from locked. Locked balance goes negative or SQL fails.
 
@@ -220,7 +222,7 @@ Funding should use current mark price. Entry price is fixed at open time. A BTC 
 
 ### BL22 — 🔴 CRITICAL: `completeBatch` Not Atomic
 
-**File:** `packages/shared/src/services/withdrawal.service.ts:499-526`
+**File:** `dotmx-backend/packages/shared/src/services/withdrawal.service.ts:499-526`
 
 No transaction wrapping the loop. Crash mid-batch leaves some withdrawals completed, others stuck.
 
@@ -228,7 +230,7 @@ No transaction wrapping the loop. Crash mid-batch leaves some withdrawals comple
 
 ### BL23 — 🔴 CRITICAL: TOCTOU Race in `lockBalance`
 
-**File:** `packages/shared/src/services/withdrawal.service.ts:604-639`
+**File:** `dotmx-backend/packages/shared/src/services/withdrawal.service.ts:604-639`
 
 SELECT then UPDATE without row locking or `WHERE available >= amount`. Concurrent withdrawals double-spend.
 
@@ -236,7 +238,7 @@ SELECT then UPDATE without row locking or `WHERE available >= amount`. Concurren
 
 ### BL27 — 🔴 CRITICAL: Logout Has No Session Ownership Check
 
-**File:** `packages/api/src/routes/auth.routes.ts:251-268`
+**File:** `dotmx-backend/packages/api/src/routes/auth.routes.ts:251-268`
 
 `/logout` accepts any refresh token with no authentication. Any user can log out any other user.
 
