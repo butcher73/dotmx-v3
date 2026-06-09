@@ -4,8 +4,8 @@
 
 The **Market Data Server** (Port 3002) provides real-time market information to clients via REST and WebSocket. It maintains live orderbook snapshots, aggregates trades, and broadcasts updates with sub-second latency.
 
-**Framework:** ElysiaJS + Fanout (in-memory or Redis-backed)  
-**Throughput:** 50K+ concurrent WebSocket clients per instance  
+**Framework:** ElysiaJS + Fanout (in-memory or Redis-backed)
+**Throughput:** 50K+ concurrent WebSocket clients per instance
 **Latency:** <100ms updates to clients
 
 ---
@@ -55,7 +55,7 @@ Connected Clients
   "timestamp": 1705856400000
 }
 
-// Delta Message  
+// Delta Message
 {
   "type": "delta",
   "symbol": "BTC-USD",
@@ -80,7 +80,7 @@ class L2BookBuilder {
   private bids: Map<price, quantity>;  // Red-Black Tree
   private asks: Map<price, quantity>;
   private lastSnapshot: L2Book;
-  
+
   // Process engine events
   onTrade(trade: Trade) {
     // Update both sides affected
@@ -89,15 +89,15 @@ class L2BookBuilder {
       this.addLevel(trade.makerSide, trade.price, newQty);
     }
   }
-  
+
   onOrderAccepted(order: Order) {
     this.addLevel(order.side, order.price, order.quantity);
   }
-  
+
   onOrderCanceled(orderId: string) {
     this.removeOrder(orderId);  // Adjust affected level
   }
-  
+
   // Get snapshot for client
   getSnapshot(depth: number): L2Book {
     return {
@@ -262,16 +262,16 @@ interface MarketDataFanout {
     symbol: string,
     handler: (message: MarketDataMessage) => void
   ): void;
-  
+
   // Unsubscribe client from symbol
   unsubscribe(clientId: string, symbol: string): void;
-  
+
   // Publish update (called by L2 builder)
   publish(symbol: string, message: MarketDataMessage): void;
-  
+
   // Get latest snapshot
   getSnapshot(symbol: string, depth?: number): L2Book;
-  
+
   // Get subscription count for monitoring
   getSubscriptionCount(symbol: string): number;
 }
@@ -288,7 +288,7 @@ class MemoryFanout implements MarketDataFanout {
       lastSnapshot: L2Book;
     }
   > = new Map();
-  
+
   subscribe(clientId: string, symbol: string, handler: Handler) {
     let sub = this.subscriptions.get(symbol);
     if (!sub) {
@@ -297,11 +297,11 @@ class MemoryFanout implements MarketDataFanout {
     }
     sub.subscribers.set(clientId, handler);
   }
-  
+
   publish(symbol: string, message: MarketDataMessage) {
     const sub = this.subscriptions.get(symbol);
     if (!sub) return;
-    
+
     // Broadcast to all subscribers
     for (const [clientId, handler] of sub.subscribers) {
       handler(message);
@@ -318,13 +318,13 @@ For horizontal scaling, use Redis Pub/Sub:
 class RedisFanout implements MarketDataFanout {
   private redis: RedisClient;
   private localSubscriptions: Map<string, Set<Handler>> = new Map();
-  
+
   async subscribe(clientId: string, symbol: string, handler: Handler) {
     // Local tracking
     let subs = this.localSubscriptions.get(symbol) ?? new Set();
     subs.add(handler);
     this.localSubscriptions.set(symbol, subs);
-    
+
     // Redis subscription (once per symbol per server)
     if (subs.size === 1) {
       this.redis.subscribe(`md:${symbol}`, (message) => {
@@ -332,7 +332,7 @@ class RedisFanout implements MarketDataFanout {
       });
     }
   }
-  
+
   async publish(symbol: string, message: MarketDataMessage) {
     // Publish to all servers' subscribers
     await this.redis.publish(`md:${symbol}`, JSON.stringify(message));
@@ -410,7 +410,7 @@ Market Data Server Metrics:
 │  ├─ Active WebSocket connections
 │  ├─ Connection rate (new/sec)
 │  └─ Churn rate (closed/sec)
-├─ Messages  
+├─ Messages
 │  ├─ Snapshots sent
 │  ├─ Deltas sent
 │  ├─ Trades sent
@@ -472,4 +472,4 @@ bun run dev:all
 
 - [API Gateway](./API-Gateway.md)
 - [Matching Engine](./Matching-Engine.md)
-- [Event Model](../architecture/06_EVENT_MODEL_SEQUENCING.md)
+[Event Model](Event-Sequencing.md)

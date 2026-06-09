@@ -206,12 +206,12 @@ White-label deployment options available:
 ### For Developers
 1. **Quick Start**: Follow [QUICKSTART.md](./QUICKSTART.md) to run locally in 15 minutes
 2. **API Reference**: Explore endpoints at `/swagger` when running
-3. **Integration Guide**: Check [docs/api/API.md](./docs/api/API.md)
+3. **Integration Guide**: Check [API.md](../api/API.md)
 
 ### For Business
-1. **Architecture Review**: Read [System-Overview.md](./docs/architecture/System-Overview.md)
-2. **Security Assessment**: Review [AUTHENTICATION.md](./docs/security/AUTHENTICATION.md)
-3. **Deployment Planning**: See [DEPLOYMENT_CHECKLIST.md](./docs/operations/DEPLOYMENT_CHECKLIST.md)
+1. **Architecture Review**: Read [System-Overview.md](../architecture/System-Overview.md)
+2. **Security Assessment**: Review [AUTHENTICATION.md](../security/AUTHENTICATION.md)
+3. **Deployment Planning**: See [DEPLOYMENT_CHECKLIST.md](../operations/DEPLOYMENT_CHECKLIST.md)
 
 ---
 

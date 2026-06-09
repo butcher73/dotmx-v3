@@ -7,7 +7,7 @@
 
 ## Current State
 
-All core features are implemented. The Rust engine passes 119 tests at 10.6M ops/sec. The API server, management server, market data pipeline, and custodial wallet system are wired and functional. Two frontends (admin + trading) and a 10-bot market maker system are ready.
+All core features are implemented. The Rust engine passes 121 tests at 10.6M ops/sec. The API server, management server, market data pipeline, and custodial wallet system are wired and functional. Two frontends (admin + trading) are ready. A market maker bot project exists independently under `dotmx-mm-bot/` (10-bot configuration, not integrated into the core system).
 
 **We are at the inflection point between "done building" and "live service."**
 
@@ -53,11 +53,10 @@ All core features are implemented. The Rust engine passes 119 tests at 10.6M ops
 
 | # | Task | Owner | Effort | Dependencies |
 |---|---|---|---|---|
-| 1.4.1 | Prometheus: scrape engine metrics (latency, throughput, queue depth) | TBD | 0.5 day | Metrics endpoints |
-| 1.4.2 | Grafana: dashboards for order throughput, funding settlements, liquidation events | TBD | 1 day | Prometheus |
-| 1.4.3 | UptimeRobot: public health check on `/health`, `/api/health`, `/market/health` | TBD | 0.5 day | Production live |
-| 1.4.4 | Alerting: on-call escalation for engine stall, DB connection loss, sweep failure | TBD | 0.5 day | Monitoring live |
-| 1.4.5 | Runbook: incident response, rollback procedure, common failure modes | TBD | 1 day | — |
+| 1.4.1 | Observability: set up metrics and monitoring infrastructure (tooling TBD) | TBD | 1 day | Metrics endpoints |
+| 1.4.2 | UptimeRobot: public health check on `/health`, `/api/health`, `/market/health` | TBD | 0.5 day | Production live |
+| 1.4.3 | Alerting: on-call escalation for engine stall, DB connection loss, sweep failure | TBD | 0.5 day | Monitoring live |
+| 1.4.4 | Runbook: incident response, rollback procedure, common failure modes | TBD | 1 day | — |
 
 ### 🎯 Phase 1 Exit Criteria
 

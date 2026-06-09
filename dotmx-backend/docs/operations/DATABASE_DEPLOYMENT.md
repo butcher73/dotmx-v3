@@ -268,7 +268,7 @@ If you encounter issues:
 1. Check logs: `tail -f logs/database.log`
 2. Verify environment variables: `printenv | grep DB_`
 3. Test connection manually: `psql -U user -h host -d database`
-4. Review [DATABASE_CONFIG.md](../DATABASE_CONFIG.md) for detailed configuration
+4. Review [DATABASE_CONFIG.md](DATABASE_CONFIG.md) for detailed configuration
 
 ---
 

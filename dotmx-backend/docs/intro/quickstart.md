@@ -212,13 +212,13 @@ MARKETDATA_PORT=3002
 
 ## Next Steps
 
-- Read the [Architecture Documentation](./docs/README.md)
-- Explore the [API Documentation](./docs/API.md)
-- Review [Deployment Guide](./docs/DEPLOYMENT.md)
-- Check [Testing Strategy](./docs/10_TESTING_PERF.md)
+- Read the [Architecture Documentation](../README.md)
+- Explore the [API Documentation](../api/API.md)
+- Review [Deployment Guide](../operations/DEPLOYMENT.md)
+- Check [Testing Strategy](../testing/Testing-Performance.md)
 
 ---
 
 ## Support
 
-For issues or questions, refer to the detailed documentation in the `/docs` folder or check the [README.md](./README.md).
+For issues or questions, refer to the detailed documentation in the `/docs` folder or check the [README.md](../../README.md).

@@ -87,7 +87,7 @@ curl -H "X-Admin-Key: admin-key-change-this-in-production" \
 
 ### Kong Configuration
 
-Kong runs in **DB-less mode** using declarative configuration from [docker/kong.yml](docker/kong.yml).
+Kong runs in **DB-less mode** using declarative configuration from [docker/kong.yml](../../docker/kong.yml).
 
 Key features:
 - No database required
@@ -96,12 +96,12 @@ Key features:
 - Fast startup time
 
 To modify Kong configuration:
-1. Edit [docker/kong.yml](docker/kong.yml)
+1. Edit [docker/kong.yml](../../docker/kong.yml)
 2. Restart Kong: `docker compose restart kong`
 
 ### Environment Variables
 
-Edit the service environment variables in [docker-compose.yml](docker-compose.yml):
+Edit the service environment variables in [docker-compose.yml](../../docker-compose.yml):
 
 ```yaml
 environment:
@@ -129,7 +129,7 @@ consumers:
 
 #### IP Restrictions
 
-Management API is restricted to internal networks by default. Update allowed IPs in [docker/kong.yml](docker/kong.yml):
+Management API is restricted to internal networks by default. Update allowed IPs in [docker/kong.yml](../../docker/kong.yml):
 
 ```yaml
 - name: ip-restriction
@@ -163,7 +163,7 @@ Management API is restricted to internal networks by default. Update allowed IPs
    - Configure allowed IPs for management API
 
 3. **Set up SSL (Optional but recommended)**
-   
+
    Add SSL certificate volume mount to Kong service:
    ```yaml
    kong:
@@ -178,13 +178,13 @@ Management API is restricted to internal networks by default. Update allowed IPs
    ```
 
 5. **Set up reverse proxy (if needed)**
-   
+
    If using nginx/caddy in front of Kong:
    ```nginx
    server {
        listen 80;
        server_name api.dotmx.xyz;
-       
+
        location / {
            proxy_pass http://localhost:80;
            proxy_set_header Host $host;
@@ -318,7 +318,7 @@ kong:
 
 ## Development vs Production
 
-For local development, use [docker-compose.dev.yml](docker-compose.dev.yml):
+For local development, use [docker-compose.dev.yml](../../docker-compose.dev.yml):
 
 ```bash
 docker compose -f docker-compose.dev.yml up

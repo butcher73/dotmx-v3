@@ -2,7 +2,7 @@
 
 ## 🎯 Start Here (Pick One)
 
-### If you want to... 
+### If you want to...
 **...just activate deployment in 5 minutes:**
 ```bash
 # 1. Generate SSH keys
@@ -20,13 +20,13 @@ git push origin main
 ```
 
 **...see what happens during deployment:**
-- See [AUTOMATED_DEPLOYMENT_READY.md](./AUTOMATED_DEPLOYMENT_READY.md) - "Deployment Flow" section
+- See [AUTOMATED_DEPLOYMENT_READY.md](../operations/AUTOMATED_DEPLOYMENT_READY.md) - "Deployment Flow" section
 
 **...troubleshoot a failed deployment:**
-- See [docs/operations/GITHUB_ACTIONS_SETUP.md](./docs/operations/GITHUB_ACTIONS_SETUP.md) - "Troubleshooting" section
+- See [GITHUB_ACTIONS_SETUP.md](../operations/GITHUB_ACTIONS_SETUP.md) - "Troubleshooting" section
 
 **...understand the full setup:**
-- Read [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) - comprehensive guide
+- Read [DEPLOYMENT_CHECKLIST.md](../operations/DEPLOYMENT_CHECKLIST.md) - comprehensive guide
 
 **...manually deploy without GitHub Actions:**
 ```bash
@@ -141,10 +141,10 @@ SLACK_WEBHOOK     = (optional)
 
 ## 📞 Get Help
 
-- **Setup Guide**: [docs/operations/GITHUB_ACTIONS_SETUP.md](./docs/operations/GITHUB_ACTIONS_SETUP.md)
-- **Full Status**: [AUTOMATED_DEPLOYMENT_READY.md](./AUTOMATED_DEPLOYMENT_READY.md)
-- **Checklist**: [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)
-- **Deployment Docs**: [docs/operations/DATABASE_DEPLOYMENT.md](./docs/operations/DATABASE_DEPLOYMENT.md)
+- **Setup Guide**: [GITHUB_ACTIONS_SETUP.md](../operations/GITHUB_ACTIONS_SETUP.md)
+- **Full Status**: [AUTOMATED_DEPLOYMENT_READY.md](../operations/AUTOMATED_DEPLOYMENT_READY.md)
+- **Checklist**: [DEPLOYMENT_CHECKLIST.md](../operations/DEPLOYMENT_CHECKLIST.md)
+- **Deployment Docs**: [DATABASE_DEPLOYMENT.md](../operations/DATABASE_DEPLOYMENT.md)
 
 ---
 

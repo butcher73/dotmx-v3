@@ -80,7 +80,7 @@ The system uses PostgreSQL with the following tables:
 - **wallet_auth_challenges** - Wallet signature challenges
 - **auth_audit_logs** - Comprehensive audit trail
 
-See [`packages/shared/src/db/schema.sql`](../packages/shared/src/db/schema.sql) for complete schema.
+See [User Schema](../../scripts/db/schema.sql) for complete schema.
 
 ## API Endpoints
 
@@ -394,11 +394,11 @@ pnpm dev:api
 ### TypeScript/JavaScript
 
 ```typescript
-import { 
-  DatabaseService, 
-  AuthService, 
+import {
+  DatabaseService,
+  AuthService,
   WalletAuthService,
-  VerexBaseService 
+  VerexBaseService
 } from '@dotmx/shared/auth';
 
 // Initialize services

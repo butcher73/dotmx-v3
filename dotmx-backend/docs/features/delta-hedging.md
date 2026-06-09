@@ -1,6 +1,6 @@
 # Delta Hedging Engine (A-Book Model)
 
-**Last Updated:** February 1, 2026  
+**Last Updated:** February 1, 2026
 **Status:** ✅ Implementation Complete
 
 ---
@@ -349,17 +349,17 @@ Net User Position:
   Long: 1.5 BTC
   Short: 0.3 BTC
   Net: +1.2 BTC (users are net long)
-  
+
 Notional: 1.2 * $50,150 (avg) = $60,180
 
 Hedge Action (threshold > $10k):
   DotMX sells 1.2 BTC @ $50,150 on Bitget (pays $12 fee)
-  
+
 Result:
   - Users collectively long 1.2 BTC
   - DotMX short 1.2 BTC on Bitget
   - Net exposure: 0 (delta neutral)
-  
+
 Profit:
   User fees: $45
   Hedge fees: $12
@@ -445,7 +445,7 @@ hedgeEngine.onEvent((event) => {
       alertAdmin("Hedge engine stopped due to failures");
     }
   }
-  
+
   if (event.type === "hedge_executed") {
     failureCount = 0; // Reset on success
   }
@@ -520,7 +520,7 @@ Use limit orders during low volatility for better prices:
 const hedgeEngine = createHedgeEngine(client, {
   orderType: "limit",
   limitOrderOffset: 0.01,  // 0.01% better than mid
-  
+
   // Fallback to market if limit not filled in 5s
   limitOrderTimeoutMs: 5000,
 });
@@ -533,7 +533,7 @@ const hedgeEngine = createHedgeEngine(client, {
 setInterval(async () => {
   const stats = hedgeEngine.getAllStats();
   const summary = calculateProfitSummary(stats);
-  
+
   await sendDailyReport({
     date: new Date().toISOString(),
     netProfit: summary.netProfit,
@@ -541,7 +541,7 @@ setInterval(async () => {
     hedgeCount: stats.reduce((sum, s) => sum + s.hedgeCount, 0),
     bySymbol: summary.bySymbol,
   });
-  
+
   // Reset daily stats (optional)
 }, 24 * 60 * 60 * 1000);
 ```
@@ -567,11 +567,11 @@ setInterval(async () => {
 
 ## 📚 Related Documentation
 
-- [Market-Data-Implementation.md](MARKET_DATA_IMPLEMENTATION.md) - Market data feeds
-- [Engine-Architecture.md](architecture/Engine-Architecture.md) - Matching engine
-- [Risk-Management.md](architecture/Risk-Management.md) - Risk checks
+- [Market Data Implementation](market-data-implementation.md) - Market data feeds
+- [Engine Architecture](../architecture/Engine-Architecture.md) - Matching engine
+- [Risk Management](../architecture/Risk-Management.md) - Risk checks
 
 ---
 
-**Document Version:** 1.0  
+**Document Version:** 1.0
 **Author:** DotMX Team

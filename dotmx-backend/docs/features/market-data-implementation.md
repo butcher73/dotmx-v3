@@ -1,6 +1,6 @@
 # Market Data Implementation Guide
 
-**Last Updated:** February 1, 2026  
+**Last Updated:** February 1, 2026
 **Status:** ✅ Core Components Complete
 
 ---
@@ -154,7 +154,7 @@ klineStore.start();
 // Connect feeds to mark price
 feedManager.onPriceUpdate((data) => {
   markPriceService.updateExternalPrice(data);
-  
+
   // Also update ticker with external data
   tickerStore.setExternalTicker(data.symbol, {
     lastPrice: data.lastPrice,
@@ -193,7 +193,7 @@ function onTradeExecuted(trade: Trade) {
     trade.price,
     trade.timestamp
   );
-  
+
   // Update ticker aggregator
   tickerStore.onTrade(trade.symbol, {
     symbol: trade.symbol,
@@ -201,7 +201,7 @@ function onTradeExecuted(trade: Trade) {
     quantity: trade.quantity,
     timestamp: trade.timestamp,
   });
-  
+
   // Update kline aggregator
   klineStore.onTrade(trade.symbol, {
     symbol: trade.symbol,
@@ -218,14 +218,14 @@ function onTradeExecuted(trade: Trade) {
 // GET /v1/ticker/24hr
 app.get("/v1/ticker/24hr", async ({ query }) => {
   const { symbol } = query;
-  
+
   // Try internal ticker first, fallback to external
   const ticker = tickerStore.getTicker(symbol);
-  
+
   if (!ticker) {
     return { error: "Symbol not found" };
   }
-  
+
   return {
     symbol: ticker.symbol,
     lastPrice: ticker.lastPrice.toString(),
@@ -244,7 +244,7 @@ app.get("/v1/ticker/24hr", async ({ query }) => {
 app.get("/v1/ticker/price", async ({ query }) => {
   const { symbol } = query;
   const ticker = tickerStore.getTicker(symbol);
-  
+
   return {
     symbol,
     price: ticker?.lastPrice.toString() ?? "0",
@@ -255,11 +255,11 @@ app.get("/v1/ticker/price", async ({ query }) => {
 app.get("/v1/markPrice", async ({ query }) => {
   const { symbol } = query;
   const data = markPriceService.getMarkPriceData(symbol);
-  
+
   if (!data) {
     return { error: "Symbol not found" };
   }
-  
+
   return {
     symbol: data.symbol,
     markPrice: data.markPrice.toString(),
@@ -275,15 +275,15 @@ app.get("/v1/markPrice", async ({ query }) => {
 // GET /v1/klines
 app.get("/v1/klines", async ({ query }) => {
   const { symbol, interval, limit = 100 } = query;
-  
+
   // Get internal klines
   let klines = klineStore.getCandles(symbol, interval, limit);
-  
+
   // If not enough internal data, fetch from external
   if (klines.length < limit / 2) {
     const external = await feedManager.feeds.get("binance")
       ?.fetchKlines(symbol, interval, limit);
-    
+
     if (external) {
       // Merge internal and external (prefer internal for recent)
       klines = [...external, ...klines]
@@ -291,7 +291,7 @@ app.get("/v1/klines", async ({ query }) => {
         .slice(-limit);
     }
   }
-  
+
   return klines.map((k) => [
     k.openTime,
     k.open.toString(),
@@ -309,7 +309,7 @@ app.get("/v1/klines", async ({ query }) => {
 app.get("/v1/fundingRate", async ({ query }) => {
   const { symbol } = query;
   const markData = markPriceService.getMarkPriceData(symbol);
-  
+
   return {
     symbol,
     fundingRate: markData?.fundingRate.toString() ?? "0",
@@ -326,10 +326,10 @@ app.get("/v1/fundingRate", async ({ query }) => {
 // WebSocket connection handler
 ws.onmessage = (message) => {
   const msg = JSON.parse(message.data);
-  
+
   if (msg.action === "subscribe") {
     const { symbol, streams } = msg;
-    
+
     // Subscribe to requested streams
     if (streams.includes("ticker")) {
       // Send ticker updates
@@ -342,11 +342,11 @@ ws.onmessage = (message) => {
           }));
         }
       };
-      
+
       const tickerInterval = setInterval(sendTicker, 1000);
       subscriptions.set(`ticker:${symbol}`, tickerInterval);
     }
-    
+
     if (streams.includes("markPrice")) {
       markPriceService.onUpdate((data) => {
         if (data.symbol === symbol) {
@@ -357,7 +357,7 @@ ws.onmessage = (message) => {
         }
       });
     }
-    
+
     if (streams.includes("kline_1m")) {
       klineStore.onUpdate(symbol, "1m", (kline) => {
         ws.send(JSON.stringify({
@@ -486,14 +486,14 @@ console.log(`Mark Price: $${result}`);
 
 ## 📚 Related Documentation
 
-- [DELTA_HEDGING.md](DELTA_HEDGING.md) - Delta hedging engine (A-Book model)
-- [Market-Data-Pipeline.md](architecture/Market-Data-Pipeline.md) - Detailed architecture
-- [Market-Data-Streaming.md](architecture/Market-Data-Streaming.md) - WebSocket protocol
-- [Engine-Architecture.md](architecture/Engine-Architecture.md) - Matching engine integration
+- [Delta Hedging](delta-hedging.md) - Delta hedging engine (A-Book model)
+- [Market Data Pipeline](../architecture/Market-Data-Pipeline.md) - Detailed architecture
+- [Market Data Streaming](../architecture/Market-Data-Streaming.md) - WebSocket protocol
+- [Engine Architecture](../architecture/Engine-Architecture.md) - Matching engine integration
 
 ---
 
-**Document Version:** 2.0  
+**Document Version:** 2.0
 **Author:** DotMX Team
 
 
@@ -575,10 +575,10 @@ markPriceService.onUpdate((data) => {
 // GET /v1/ticker/24hr
 app.get("/v1/ticker/24hr", async ({ query }) => {
   const symbol = query.symbol;
-  
+
   // Try internal ticker first
   let ticker = tickerStore.getTicker(symbol);
-  
+
   // Fallback to external
   if (!ticker) {
     const external = feedManager.getTicker(symbol);
@@ -596,7 +596,7 @@ app.get("/v1/ticker/24hr", async ({ query }) => {
       };
     }
   }
-  
+
   return ticker;
 });
 
@@ -604,7 +604,7 @@ app.get("/v1/ticker/24hr", async ({ query }) => {
 app.get("/v1/markPrice", async ({ query }) => {
   const symbol = query.symbol;
   const data = markPriceService.getMarkPriceData(symbol);
-  
+
   return {
     symbol,
     markPrice: data?.markPrice ?? 0,
@@ -618,10 +618,10 @@ app.get("/v1/markPrice", async ({ query }) => {
 // GET /v1/klines
 app.get("/v1/klines", async ({ query }) => {
   const { symbol, interval, limit = 100 } = query;
-  
+
   // Try internal klines first
   let klines = klineStore.getCandles(symbol, interval, limit);
-  
+
   // Fallback to external
   if (klines.length < limit / 2) {
     const binance = feedManager.feeds.get("binance");
@@ -631,7 +631,7 @@ app.get("/v1/klines", async ({ query }) => {
       klines = mergeKlines(klines, external);
     }
   }
-  
+
   return klines;
 });
 ```
@@ -815,11 +815,11 @@ const hourlyCandles = klines.getCandles("BTC-USD", "1h", 100);
 
 ## 🔗 Related Documentation
 
-- [Market-Data-Pipeline.md](../docs/architecture/Market-Data-Pipeline.md) - Full architecture
-- [Market-Data-Streaming.md](../docs/architecture/Market-Data-Streaming.md) - WebSocket protocol
-- [Engine-Architecture.md](../docs/architecture/Engine-Architecture.md) - Matching engine
+- [Market Data Pipeline](../architecture/Market-Data-Pipeline.md) - Full architecture
+- [Market Data Streaming](../architecture/Market-Data-Streaming.md) - WebSocket protocol
+- [Engine Architecture](../architecture/Engine-Architecture.md) - Matching engine
 
 ---
 
-**Document Version:** 1.0  
+**Document Version:** 1.0
 **Author:** DotMX Team

@@ -12,18 +12,18 @@
 | **Rust Engine** | 🟢 Ready | 100% (30/30) | All features implemented |
 | **API Server** | 🟢 Ready | ~99% | All routes wired, trading + market data + positions |
 | **Market Data** | 🟢 Ready | ~95% | WS handlers complete, depth + ticker wired to DB |
-| **Persistence** | 🟢 Ready | ~85% | 5 migrations, withdrawal limits, webhooks, alerts |
+| **Persistence** | 🟢 Ready | ~85% | 7 migrations, withdrawal limits, webhooks, alerts |
 | **Ledger** | 🟢 Ready | ~90% | Liquidation + margin manager fully implemented |
 | **Gateway (Kong)** | 🟢 Ready | ~90% | Production config needed |
 | **Management** | 🟢 Ready | ~95% | Circuit breaker, metrics, limits, alerts |
-| **Shared** | 🟢 Ready | ~98% | Error codes, non-EVM wallet auth, email logging |
+| **Shared** | 🟢 Ready | ~98% | Error codes, EVM wallet auth, email logging |
 | **ZK Module** | 🔴 Not Started | 0% | Future feature |
 
 ---
 
 ## 🦀 RUST ENGINE (rust-engine/) - 🟢 READY (100%)
 
-### ✅ COMPLETED FEATURES (30/30) — 119 tests passing
+### ✅ COMPLETED FEATURES (30/30) — 121 tests passing
 
 #### Core Matching Engine ✅
 - ✅ **Limit Order Matching** - 10.6M orders/sec, 94ns latency
@@ -299,10 +299,10 @@ _No remaining features — Rust engine is 100% implemented._
 - ✅ **IP Restriction** - Management API protection
 
 #### Services Configured
-- ✅ **API Service** - Trading APIs on :3001
-- ✅ **Auth Service** - Authentication on :3010
-- ✅ **Market Data Service** - Real-time data on :3006
+- ✅ **API Service** - Trading APIs on :3003
+- ✅ **Market Data Service** - Real-time data on :3002
 - ✅ **Management Service** - Admin APIs on :3004
+- ✅ **Engine Service** - Matching engine on :3001 (NATS internal)
 
 ### ⚠️ PRODUCTION HARDENING (Kong Gateway)
 
@@ -394,7 +394,7 @@ _No remaining features — Rust engine is 100% implemented._
 - ✅ **Fee Services** - Spot + Perpetual fee calculation (integrated into engine)
 - ✅ **Account Services** - Security, management, VIP tiers, loyalty
 - ✅ **Webhook Services** - Alchemy integration for deposit detection
-- ✅ **Wallet Auth** - EVM + Solana (Ed25519) + Bitcoin (P2PKH) + Tron signature verification
+- ✅ **Wallet Auth** - EVM signature verification (viem challenge-response)
 
 ---
 
@@ -422,7 +422,7 @@ _No remaining features — Rust engine is 100% implemented._
 
 ### ⚠️ PRODUCTION CHECKLIST
 
-See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) for deployment checklist:
+See [Production Checklist](../../dotmx-backend/docs/operations/PRODUCTION_CHECKLIST.md) for deployment checklist:
 - [ ] Security hardening (passwords, API keys)
 - [ ] SSL certificates
 - [ ] DNS configuration
@@ -436,7 +436,7 @@ See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) for deployment checklist:
 
 ### ✅ ALL BLOCKERS RESOLVED
 
-1. **Rust Engine** — ✅ 100% Complete (30/30 features, 114 tests)
+1. **Rust Engine** — ✅ 100% Complete (30/30 features, 121 tests)
    - ✅ All perpetual features (leverage, liquidation, funding, positions)
    - ✅ All order types (Market, IOC, FOK, PostOnly, Stop)
    - ✅ WAL persistence with CRC32 checksums & crash recovery
@@ -453,7 +453,7 @@ See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) for deployment checklist:
    - ✅ WebSocket handlers complete (depth + trade streams via fanout)
 
 3. **Database Schema** — ✅ Complete
-   - ✅ 5 migrations: users, chains, wallet, perpetual, limits/webhooks/alerts
+   - ✅ 7 migrations: users, chains, wallet, perpetual, limits/webhooks/alerts, api_keys, kyc
    - ✅ All perpetual tables (positions, liquidation, funding, insurance)
    - ✅ Withdrawal limits tables (per-tier, usage tracking)
    - ✅ Webhook tables (subscriptions, deliveries)
@@ -467,7 +467,7 @@ See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) for deployment checklist:
 5. **Shared Library** — ✅ 98% Complete
    - ✅ Standardized error codes (65+ across 9 categories)
    - ✅ Error response formatting
-   - ✅ Non-EVM wallet auth (Solana Ed25519, Bitcoin P2PKH, Tron)
+   - ✅ EVM wallet auth (viem challenge-response)
    - ✅ Email notification logging (password reset, verification)
 
 ### 🎯 PRODUCTION LAUNCH CHECKLIST
@@ -545,7 +545,7 @@ See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) for deployment checklist:
 
 **Database & Persistence:**
 - ✅ PostgreSQL with connection pooling
-- ✅ 5 migrations (schema v5)
+- ✅ 7 migrations (schema v7)
 - ✅ WAL-based recovery
 - ⏭️ Transaction pooling (SKIP - v4+)
 - ⏭️ Read replicas (SKIP - v4+)
@@ -631,11 +631,11 @@ See [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) for deployment checklist:
 ## 🔄 NEXT STEPS
 
 ### ✅ Completed (All Core + Platform Features)
-1. ✅ Rust Engine — 100% (30/30 features, 114 tests, WAL + STP)
+1. ✅ Rust Engine — 100% (30/30 features, 121 tests, WAL + STP)
 2. ✅ API Server — 99% (all routes wired to gateway/DB, WS handlers complete)
-3. ✅ Database — 100% (5 migrations: users, chains, wallet, perpetual, limits/webhooks/alerts)
+3. ✅ Database — 100% (7 migrations: users, chains, wallet, perpetual, limits/webhooks/alerts, api_keys, kyc)
 4. ✅ Management — 95% (circuit breaker, metrics, withdrawal limits, alert config)
-5. ✅ Shared — 98% (error codes, non-EVM wallet auth, email logging)
+5. ✅ Shared — 98% (error codes, EVM wallet auth, email logging)
 6. ✅ Kong Gateway — 90% (core features done, needs production hardening)
 7. ✅ Engine — Fee calculation integrated (maker/taker rates with per-user override)
 8. ✅ Ledger — Liquidation execution complete (insurance fund + margin transfer)

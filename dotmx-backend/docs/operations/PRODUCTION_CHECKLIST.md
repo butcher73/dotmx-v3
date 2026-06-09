@@ -7,7 +7,7 @@ Use this checklist before deploying to production.
 - [ ] **Change default passwords**
   - [ ] PostgreSQL password in `docker-compose.yml`
   - [ ] Update `DATABASE_URL` with new password
-  
+
 - [ ] **Update API keys**
   - [ ] Change admin key in `docker/kong.yml` (consumer section)
   - [ ] Generate strong API keys for production users
@@ -248,7 +248,7 @@ docker compose up -d --build
 
 - 📚 [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md) - Detailed setup guide
 - 📋 [PRODUCTION_CONFIG.md](PRODUCTION_CONFIG.md) - Configuration summary
-- 🏗️ [ARCHITECTURE_DIAGRAM.txt](ARCHITECTURE_DIAGRAM.txt) - System architecture
+- 🏗️ [ARCHITECTURE_DIAGRAM.txt](../architecture/ARCHITECTURE_DIAGRAM.txt) - System architecture
 
 ## Support Contacts
 

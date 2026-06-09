@@ -1,7 +1,7 @@
 # DotMX Endpoint & Port Reference
 
-> **Single source of truth** for how frontend, nginx, and backend connect.  
-> If something returns 404 or 502, check this file first.
+> **Development setup** — Nginx reverse proxy on `:8080`. For production, see
+> [START HERE](START_HERE.md) which uses Kong API Gateway on `:80/443`.
 
 ---
 
@@ -43,7 +43,7 @@ Nginx forwards `GET /v1/orders` to `http://127.0.0.1:3003/v1/orders`.
 | Service | Port | Description |
 |---------|------|-------------|
 | Frontend (Next.js) | 3000 | Web UI |
-| Engine Server | 3001 | Matching engine (internal) |
+| Engine Server | 3001 | Matching engine (internal, NATS communication) |
 | Market Data Server | 3002 | Real-time market data + WebSocket |
 | API Server (with auth) | 3003 | Main REST API |
 | Management Server | 3004 | Admin panel API |
@@ -188,6 +188,7 @@ If adding a new route file, use these prefixes:
 | Webhooks | `/webhooks` | `/webhooks/alchemy/deposits` |
 | Export | `/v1/export` | `/v1/export/trades` |
 | Webhook Subs | `/v1/webhook-subscriptions` | `/v1/webhook-subscriptions` |
+| Loyalty | `/loyalty` | `/loyalty/points` |
 
 **DO NOT use `/api/v1` as a prefix** — the `/api` part comes from nginx, not the backend.
 

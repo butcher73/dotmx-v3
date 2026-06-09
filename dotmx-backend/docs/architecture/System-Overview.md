@@ -2,9 +2,9 @@
 
 **DotMX** is a high-performance perpetual futures and spot exchange with institutional-grade security, built for production at scale.
 
-**Last Updated:** January 2026  
-**Status:** Production Ready  
-**Changes:** See [DESIGN_CHANGES.md](../DESIGN_CHANGES.md) for differences from original design
+**Last Updated:** January 2026
+**Status:** Production Ready
+**Changes:** See [Design Changes](../../docs/project/DESIGN_CHANGES.md) for differences from original design
 
 ---
 
@@ -130,7 +130,7 @@ DotMX is a **complete exchange platform** featuring:
 ## 📦 Component Breakdown
 
 ### 1. API Layer (ElysiaJS + TypeScript)
-**Location:** `packages/api/`  
+**Location:** `packages/api/`
 **Purpose:** REST API, WebSocket streams, business logic
 
 **Features:**
@@ -146,12 +146,12 @@ DotMX is a **complete exchange platform** featuring:
 - `src/middleware/` - Auth, rate limiting, CORS
 - `docs/openapi.json` - OpenAPI specification
 
-**Documentation:** [01_API_ELYSIA.md](01_API_ELYSIA.md), [API.md](API.md)
+**Documentation:** [API-Gateway](API-Gateway.md), [API Reference](../api/API.md)
 
 ---
 
 ### 2. Matching Engine (Rust)
-**Location:** `rust-engine/`  
+**Location:** `rust-engine/`
 **Purpose:** High-performance order matching
 
 **Architecture:**
@@ -171,7 +171,7 @@ rust-engine/
 - Fast-path risk checks (<1μs)
 - Event sourcing with replay
 - Sharding by symbol
-- 450+ tests, 95% coverage
+- 121 tests, 95% coverage
 
 **Performance:**
 - <1μs matching latency
@@ -179,12 +179,12 @@ rust-engine/
 - Zero-copy message parsing
 - Lock-free data structures
 
-**Documentation:** [02_ENGINE_ARCHITECTURE.md](02_ENGINE_ARCHITECTURE.md), [03_ORDERBOOK_DATA_STRUCTURES.md](03_ORDERBOOK_DATA_STRUCTURES.md), [04_MATCHING_ALGORITHM.md](04_MATCHING_ALGORITHM.md)
+**Documentation:** [Engine Architecture](Engine-Architecture.md), [Orderbook Design](Orderbook-Design.md), [Matching Algorithm](Matching-Algorithm.md)
 
 ---
 
 ### 3. Shared Services (TypeScript)
-**Location:** `packages/shared/`  
+**Location:** `packages/shared/`
 **Purpose:** Common services and utilities
 
 **Services:**
@@ -201,7 +201,7 @@ rust-engine/
 - Fee tiers, loyalty points
 - Security logs, audit trail
 
-**Documentation:** [AUTHENTICATION.md](AUTHENTICATION.md), [ACCOUNT_SECURITY.md](ACCOUNT_SECURITY.md), [PERPETUAL_FEES.md](PERPETUAL_FEES.md)
+**Documentation:** [Authentication](../security/AUTHENTICATION.md), [Account Security](../security/ACCOUNT_SECURITY.md), [Perpetual Fees](../reference/PERPETUAL_FEES.md)
 
 ---
 
@@ -230,7 +230,7 @@ Events (Engine → Subscribers):
 - Replay from any point
 - Horizontal scaling
 
-**Documentation:** [06_EVENT_MODEL_SEQUENCING.md](06_EVENT_MODEL_SEQUENCING.md), [07_PERSISTENCE_REPLAY.md](07_PERSISTENCE_REPLAY.md)
+**Documentation:** [Event Sequencing](Event-Sequencing.md), [Persistence & Recovery](Persistence-Recovery.md)
 
 ---
 
@@ -244,7 +244,7 @@ Events (Engine → Subscribers):
 - Request/Response Logging
 - Prometheus Metrics
 
-**Documentation:** [KONG_SETUP.md](KONG_SETUP.md), [DEPLOYMENT.md](DEPLOYMENT.md)
+**Documentation:** [Kong Setup](../operations/KONG_SETUP.md), [Deployment](../operations/DEPLOYMENT.md)
 
 ---
 
@@ -349,7 +349,7 @@ Events (Engine → Subscribers):
 - Scale matching engines based on message queue depth
 - Scale WebSocket servers based on connection count
 
-**Documentation:** [08_SHARDING_SCALING_DEPLOYMENT.md](08_SHARDING_SCALING_DEPLOYMENT.md)
+**Documentation:** [Scaling & Deployment](Scaling-Deployment.md)
 
 ---
 
@@ -377,7 +377,7 @@ Asynchronous checks after matching:
 - **Insurance Fund**: Per-symbol, covers losses
 - **Auto-Deleveraging**: Last resort for socialized losses
 
-**Documentation:** [05_RISK_FAST_PATH.md](05_RISK_FAST_PATH.md), [PERPETUAL_FEES.md](PERPETUAL_FEES.md)
+**Documentation:** [Risk Management](Risk-Management.md), [Perpetual Fees](../reference/PERPETUAL_FEES.md)
 
 ---
 
@@ -409,7 +409,7 @@ Asynchronous checks after matching:
 - 25% off taker fees when paying with DMX
 - Not applied to maker rebates (already negative)
 
-**Documentation:** [PERPETUAL_FEES.md](PERPETUAL_FEES.md), [FEE_TIER_SYSTEM.md](FEE_TIER_SYSTEM.md)
+**Documentation:** [Perpetual Fees](../reference/PERPETUAL_FEES.md), FEE_TIER_SYSTEM.md
 
 ---
 
@@ -446,7 +446,7 @@ Asynchronous checks after matching:
 - Security alerts (email/push)
 - Comprehensive audit logs
 
-**Documentation:** [AUTHENTICATION.md](AUTHENTICATION.md), [ACCOUNT_SECURITY.md](ACCOUNT_SECURITY.md)
+**Documentation:** [Authentication](../security/AUTHENTICATION.md), [Account Security](../security/ACCOUNT_SECURITY.md)
 
 ---
 
@@ -467,7 +467,7 @@ Asynchronous checks after matching:
 - GET /ticker - 24h stats
 - GET /klines - Historical OHLCV
 
-**Documentation:** [09_MARKET_DATA_PIPELINE.md](09_MARKET_DATA_PIPELINE.md)
+**Documentation:** [Market Data Pipeline](Market-Data-Pipeline.md)
 
 ---
 
@@ -476,8 +476,8 @@ Asynchronous checks after matching:
 ### Test Coverage
 ```
 Rust Engine:
-  • Unit tests: 450+
-  • Integration tests: 50+
+  • Unit tests: 121
+  • Integration tests: included
   • Benchmark suite: 20+
   • Coverage: 95%+
 
@@ -501,28 +501,30 @@ TypeScript Services:
 - SQL injection prevention
 - XSS/CSRF protection
 
-**Documentation:** [10_TESTING_PERF.md](10_TESTING_PERF.md)
+**Documentation:** [Testing & Performance](../testing/Testing-Performance.md)
 
 ---
 
 ## 📚 Documentation Structure
 
 ### Getting Started
-- **00_OVERVIEW.md** ← You are here
-- **DESIGN_CHANGES.md** - What changed from original design
+- **System-Overview.md** ← You are here
 - **README.md** - Quick start guide
 
-### Core Modules (01-10)
-1. **01_API_ELYSIA.md** - REST API, WebSocket, routing
-2. **02_ENGINE_ARCHITECTURE.md** - Matching engine design
-3. **03_ORDERBOOK_DATA_STRUCTURES.md** - Orderbook internals
-4. **04_MATCHING_ALGORITHM.md** - Price-time priority, edge cases
-5. **05_RISK_FAST_PATH.md** - Pre-trade risk checks
-6. **06_EVENT_MODEL_SEQUENCING.md** - Event sourcing, NATS
-7. **07_PERSISTENCE_REPLAY.md** - Database, crash recovery
-8. **08_SHARDING_SCALING_DEPLOYMENT.md** - Scaling strategies
-9. **09_MARKET_DATA_PIPELINE.md** - WebSocket streams, REST
-10. **10_TESTING_PERF.md** - Testing strategy, benchmarks
+### Architecture Modules
+- **API-Gateway.md** - Kong API Gateway configuration
+- **Engine-Architecture.md** - Matching engine design
+- **Matching-Engine.md** - Core matching engine internals
+- **Orderbook-Design.md** - Orderbook data structures
+- **Matching-Algorithm.md** - Price-time priority, edge cases
+- **Risk-Management.md** - Pre-trade risk checks
+- **Event-Sequencing.md** - Event sourcing, NATS
+- **Persistence-Recovery.md** - Database, crash recovery
+- **Scaling-Deployment.md** - Scaling strategies
+- **Market-Data-Pipeline.md** - WebSocket streams, REST
+- **Market-Data-Streaming.md** - Real-time streaming details
+- **Custodial-Wallet-System.md** - Wallet architecture
+- **ARCHITECTURE_DIAGRAM.txt** - Visual diagram
 
 ### Feature Documentation
 - **API.md** - Complete API reference, OpenAPI spec
@@ -539,7 +541,7 @@ TypeScript Services:
 
 ### OpenAPI
 - `docs/openapi.json` - OpenAPI 3.1.0 specification
-- Access Swagger UI: `http://localhost:3000/swagger`
+- Access Swagger UI: `http://localhost:3003/swagger`
 
 ---
 
@@ -583,8 +585,8 @@ TypeScript Services:
 - [x] Deployment guide (DEPLOYMENT.md)
 
 ### Testing
-- [x] 450+ Rust tests (95% coverage)
-- [x] 150+ TypeScript tests (85% coverage)
+- [x] 121 Rust tests (95% coverage)
+- [x] TypeScript tests exist (Bun test framework)
 - [x] Load testing (100K concurrent users)
 - [x] Security testing (penetration tests)
 
@@ -678,6 +680,6 @@ Proprietary - DotMX Exchange
 
 ---
 
-**Document Version:** 2.0  
-**Last Updated:** January 20, 2026  
+**Document Version:** 2.0
+**Last Updated:** January 20, 2026
 **Previous Version:** See git history (v1.0 - November 2025)

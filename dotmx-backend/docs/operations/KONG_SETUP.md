@@ -13,7 +13,7 @@ DotMX uses Kong API Gateway to provide:
 - **Health checks** with circuit breaking (active + passive)
 - **Load balancing** via upstreams with health monitoring
 
-> 📖 For detailed rate limiting configuration, see [../KONG_RATE_LIMITING.md](../KONG_RATE_LIMITING.md)
+> 📖 For detailed rate limiting configuration, see [../api/kong-rate-limiting.md](../api/kong-rate-limiting.md)
 
 ## Architecture
 

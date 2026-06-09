@@ -194,14 +194,14 @@ tail -f /var/log/dotmx/*.log
 lsof -i :3000
 ```
 
-See [docs/operations/GITHUB_ACTIONS_SETUP.md](./docs/operations/GITHUB_ACTIONS_SETUP.md) for detailed troubleshooting.
+See [GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md) for detailed troubleshooting.
 
 ## 📚 Documentation
 
 - **Quick Start:** [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)
-- **Setup Guide:** [docs/operations/GITHUB_ACTIONS_SETUP.md](./docs/operations/GITHUB_ACTIONS_SETUP.md)
-- **Database Deployment:** [docs/operations/DATABASE_DEPLOYMENT.md](./docs/operations/DATABASE_DEPLOYMENT.md)
-- **Full Deployment Guide:** [docs/operations/DEPLOYMENT.md](./docs/operations/DEPLOYMENT.md)
+- **Setup Guide:** [GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md)
+- **Database Deployment:** [DATABASE_DEPLOYMENT.md](DATABASE_DEPLOYMENT.md)
+- **Full Deployment Guide:** [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## ✨ Example Workflow Run
 
@@ -215,7 +215,7 @@ After pushing to main, you'll see in **GitHub Actions**:
    ├─ Type check: No errors ✅
    └─ Job succeeded
 
-✅ deploy (3 min)  
+✅ deploy (3 min)
    ├─ Connect to calgary.petaex.com
    ├─ Update code (git fetch/reset)
    ├─ Deploy database
@@ -241,7 +241,7 @@ Your automated CI/CD pipeline is ready. The system will:
 
 ---
 
-**Questions?** Check [docs/operations/GITHUB_ACTIONS_SETUP.md](./docs/operations/GITHUB_ACTIONS_SETUP.md) or see the troubleshooting section above.
+**Questions?** Check [GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md) or see the troubleshooting section above.
 
 **Ready to deploy?** Push to main:
 ```bash

@@ -2,7 +2,7 @@
 
 **Real-time streaming of orderbook depth, trades, tickers, and candlesticks to thousands of concurrent WebSocket clients.**
 
-**Last Updated:** January 21, 2026  
+**Last Updated:** January 21, 2026
 **Status:** ✅ Production Implementation
 
 ---
@@ -214,12 +214,12 @@ let orderbook = { bids: {}, asks: {} };
 
 ws.onmessage = (message) => {
   const data = JSON.parse(message.data);
-  
+
   if (data.type === 'snapshot') {
     // Reset orderbook
     orderbook = { bids: {}, asks: {} };
     lastSequence = data.sequence;
-    
+
     // Apply snapshot
     for (const [price, qty] of data.bids) {
       orderbook.bids[price] = qty;
@@ -228,7 +228,7 @@ ws.onmessage = (message) => {
       orderbook.asks[price] = qty;
     }
   }
-  
+
   if (data.type === 'update') {
     // Check for gap
     if (data.prevSequence !== lastSequence) {
@@ -236,9 +236,9 @@ ws.onmessage = (message) => {
       ws.send(JSON.stringify({ type: 'subscribe', channels: ['orderbook'], symbol: 'BTC-USDT' }));
       return;
     }
-    
+
     lastSequence = data.sequence;
-    
+
     // Apply changes
     for (const [price, qty] of data.changes.bids) {
       if (qty === '0.00') {
@@ -265,7 +265,7 @@ If client detects missing sequences:
 
 ### 1. Event Throttling
 
-**Problem:** Matching engine may emit hundreds of updates per second  
+**Problem:** Matching engine may emit hundreds of updates per second
 **Solution:** Batch updates into fixed time windows
 
 ```typescript
@@ -273,17 +273,17 @@ If client detects missing sequences:
 class OrderbookBuilder {
   private pendingChanges: Map<string, Change[]> = new Map();
   private throttleInterval = 50; // ms
-  
+
   constructor() {
     setInterval(() => this.flushChanges(), this.throttleInterval);
   }
-  
+
   onOrderbookEvent(event: OrderbookEvent) {
     const symbol = event.symbol;
     if (!this.pendingChanges.has(symbol)) {
       this.pendingChanges.set(symbol, []);
     }
-    
+
     // Accumulate changes
     this.pendingChanges.get(symbol)!.push({
       price: event.price,
@@ -291,27 +291,27 @@ class OrderbookBuilder {
       side: event.side
     });
   }
-  
+
   flushChanges() {
     for (const [symbol, changes] of this.pendingChanges) {
       // Coalesce multiple updates to same price level
       const coalesced = this.coalesceChanges(changes);
-      
+
       // Emit single update message
       this.broadcastUpdate(symbol, coalesced);
     }
-    
+
     this.pendingChanges.clear();
   }
-  
+
   coalesceChanges(changes: Change[]): Change[] {
     const byPriceLevel = new Map<string, Change>();
-    
+
     for (const change of changes) {
       const key = `${change.side}-${change.price}`;
       byPriceLevel.set(key, change); // Last update wins
     }
-    
+
     return Array.from(byPriceLevel.values());
   }
 }
@@ -323,21 +323,21 @@ class OrderbookBuilder {
 
 ### 2. Snapshot Caching
 
-**Problem:** Sending full snapshot on every subscription is expensive  
+**Problem:** Sending full snapshot on every subscription is expensive
 **Solution:** Maintain cached snapshot, send immediately
 
 ```typescript
 class OrderbookCache {
   private snapshots: Map<string, OrderbookSnapshot> = new Map();
-  
+
   getSnapshot(symbol: string): OrderbookSnapshot {
     return this.snapshots.get(symbol) || this.buildSnapshot(symbol);
   }
-  
+
   updateSnapshot(symbol: string, changes: Change[]) {
     const snapshot = this.snapshots.get(symbol);
     if (!snapshot) return;
-    
+
     for (const change of changes) {
       if (change.side === 'bid') {
         if (change.quantity === 0) {
@@ -348,7 +348,7 @@ class OrderbookCache {
       }
       // Same for asks...
     }
-    
+
     snapshot.sequence++;
   }
 }
@@ -358,7 +358,7 @@ class OrderbookCache {
 
 ### 3. Per-Client Rate Limiting
 
-**Problem:** Malicious/buggy clients subscribing to 100+ symbols  
+**Problem:** Malicious/buggy clients subscribing to 100+ symbols
 **Solution:** Enforce subscription limits
 
 ```typescript
@@ -369,22 +369,22 @@ class WebSocketConnection {
   private subscriptions: Set<string> = new Set();
   private messageCount = 0;
   private rateLimitWindow = Date.now();
-  
+
   subscribe(symbol: string, channels: string[]) {
     // Check subscription limit
     if (this.subscriptions.size >= MAX_SUBSCRIPTIONS_PER_CLIENT) {
       this.send({ error: 'Too many subscriptions' });
       return;
     }
-    
+
     // Add subscription
     const key = `${symbol}:${channels.join(',')}`;
     this.subscriptions.add(key);
-    
+
     // Send snapshot
     this.sendSnapshot(symbol, channels);
   }
-  
+
   send(message: any) {
     // Rate limit check
     const now = Date.now();
@@ -392,12 +392,12 @@ class WebSocketConnection {
       this.messageCount = 0;
       this.rateLimitWindow = now;
     }
-    
+
     if (this.messageCount >= MAX_MESSAGES_PER_SECOND) {
       console.warn(`Client ${this.id} rate limited`);
       return; // Drop message
     }
-    
+
     this.messageCount++;
     this.ws.send(JSON.stringify(message));
   }
@@ -408,7 +408,7 @@ class WebSocketConnection {
 
 ### 4. Slow Client Detection
 
-**Problem:** Slow clients block WebSocket server threads  
+**Problem:** Slow clients block WebSocket server threads
 **Solution:** Monitor send buffer, drop slow clients
 
 ```typescript
@@ -421,7 +421,7 @@ class WebSocketConnection {
       this.ws.close(1008, 'Client too slow');
     }
   }
-  
+
   send(message: any) {
     this.checkBufferSize();
     this.ws.send(JSON.stringify(message));
@@ -435,8 +435,8 @@ class WebSocketConnection {
 
 ### 1. Orderbook (L2 - Top 50 Levels)
 
-**Use Case:** Trading UI, depth charts  
-**Update Frequency:** 50-100ms  
+**Use Case:** Trading UI, depth charts
+**Update Frequency:** 50-100ms
 **Size:** 2-5 KB per update
 
 **NATS Subject:** `md.{symbol}.l2`
@@ -455,8 +455,8 @@ interface OrderbookL2 {
 
 ### 2. Orderbook (L3 - Full Depth)
 
-**Use Case:** Market makers, institutional traders  
-**Update Frequency:** 50-100ms  
+**Use Case:** Market makers, institutional traders
+**Update Frequency:** 50-100ms
 **Size:** 50-200 KB per snapshot
 
 **NATS Subject:** `md.{symbol}.l3`
@@ -477,8 +477,8 @@ interface OrderbookL3 {
 
 ### 3. Trades
 
-**Use Case:** Trade history, tape reading  
-**Update Frequency:** Real-time (no throttling)  
+**Use Case:** Trade history, tape reading
+**Update Frequency:** Real-time (no throttling)
 **Size:** ~200 bytes per trade
 
 **NATS Subject:** `md.{symbol}.trades`
@@ -515,8 +515,8 @@ engine.on('trade', (trade) => {
 
 ### 4. Ticker (24h Stats)
 
-**Use Case:** Market overview, price alerts  
-**Update Frequency:** 1 second  
+**Use Case:** Market overview, price alerts
+**Update Frequency:** 1 second
 **Size:** ~500 bytes
 
 **NATS Subject:** `md.{symbol}.ticker`
@@ -540,24 +540,24 @@ interface Ticker {
 ```typescript
 class TickerCalculator {
   private trades24h: Trade[] = [];
-  
+
   onTrade(trade: Trade) {
     this.trades24h.push(trade);
-    
+
     // Remove trades older than 24h
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
     this.trades24h = this.trades24h.filter(t => t.timestamp > cutoff);
-    
+
     // Recalculate stats
     this.emitTicker();
   }
-  
+
   emitTicker() {
     if (this.trades24h.length === 0) return;
-    
+
     const prices = this.trades24h.map(t => parseFloat(t.price));
     const volumes = this.trades24h.map(t => parseFloat(t.quantity));
-    
+
     const ticker: Ticker = {
       price: this.trades24h[this.trades24h.length - 1].price,
       high24h: Math.max(...prices).toString(),
@@ -565,7 +565,7 @@ class TickerCalculator {
       volume24h: volumes.reduce((a, b) => a + b, 0).toString(),
       // ... more calculations
     };
-    
+
     nats.publish(`md.${this.symbol}.ticker`, JSON.stringify(ticker));
   }
 }
@@ -575,8 +575,8 @@ class TickerCalculator {
 
 ### 5. Klines (OHLCV Candlesticks)
 
-**Use Case:** Charts, technical analysis  
-**Update Frequency:** Per interval (1m, 5m, 1h, etc.)  
+**Use Case:** Charts, technical analysis
+**Update Frequency:** Per interval (1m, 5m, 1h, etc.)
 **Size:** ~300 bytes per candle
 
 **NATS Subject:** `md.{symbol}.klines.{interval}`
@@ -606,17 +606,17 @@ interface Kline {
 ```typescript
 class KlineAggregator {
   private currentCandle: Kline | null = null;
-  
+
   onTrade(trade: Trade) {
     const candleStart = this.getCandleStartTime(trade.timestamp, this.interval);
-    
+
     if (!this.currentCandle || this.currentCandle.openTime !== candleStart) {
       // Close previous candle
       if (this.currentCandle) {
         this.currentCandle.isClosed = true;
         this.emitKline(this.currentCandle);
       }
-      
+
       // Start new candle
       this.currentCandle = {
         symbol: trade.symbol,
@@ -639,7 +639,7 @@ class KlineAggregator {
       this.currentCandle.volume = (parseFloat(this.currentCandle.volume) + parseFloat(trade.quantity)).toString();
       this.currentCandle.trades++;
     }
-    
+
     // Emit in-progress candle
     this.emitKline(this.currentCandle);
   }
@@ -660,7 +660,7 @@ import type { MarketDataFanout } from '@dotmx/marketdata';
 
 export function createMarketDataWs(fanout: MarketDataFanout) {
   const connections = new Map<string, WebSocketContext>();
-  
+
   return new Elysia()
     .ws('/ws/market', {
       open(ws) {
@@ -669,13 +669,13 @@ export function createMarketDataWs(fanout: MarketDataFanout) {
           subscriptions: new Set(),
         };
         connections.set(ws.id, ctx);
-        
+
         ws.send(JSON.stringify({
           type: 'connected',
           connectionId: ws.id
         }));
       },
-      
+
       close(ws) {
         const ctx = connections.get(ws.id);
         if (ctx) {
@@ -686,32 +686,32 @@ export function createMarketDataWs(fanout: MarketDataFanout) {
           connections.delete(ws.id);
         }
       },
-      
+
       message(ws, message: any) {
         const ctx = connections.get(ws.id);
         if (!ctx) return;
-        
+
         if (message.type === 'subscribe') {
           const { symbol, channels } = message;
-          
+
           // Validate
           if (!symbol || !channels) {
             ws.send(JSON.stringify({ error: 'Invalid subscribe message' }));
             return;
           }
-          
+
           // Subscribe to fanout
           fanout.subscribe(ws.id, symbol, channels, (data) => {
             ws.send(JSON.stringify(data));
           });
-          
+
           ctx.subscriptions.add(symbol);
-          
+
           // Send snapshot
           const snapshot = fanout.getSnapshot(symbol);
           ws.send(JSON.stringify(snapshot));
         }
-        
+
         if (message.type === 'unsubscribe') {
           const { symbol } = message;
           fanout.unsubscribe(ws.id, symbol);
@@ -748,7 +748,7 @@ export function createMarketDataWs(fanout: MarketDataFanout) {
                   └──────────────┘
 ```
 
-**Sticky Sessions:** Not required (NATS handles pub/sub)  
+**Sticky Sessions:** Not required (NATS handles pub/sub)
 **Capacity:** 50K connections per server × 3 = 150K total
 
 ---
@@ -810,7 +810,7 @@ if (update.prevSequence !== lastSequence) {
     expected: lastSequence + 1,
     received: update.sequence
   });
-  
+
   // Re-subscribe to get fresh snapshot
   resubscribe();
 }
@@ -865,7 +865,7 @@ import { check } from 'k6';
 
 export default function () {
   const url = 'ws://localhost:3000/ws/market';
-  
+
   ws.connect(url, function (socket) {
     socket.on('open', () => {
       socket.send(JSON.stringify({
@@ -874,7 +874,7 @@ export default function () {
         channels: ['orderbook', 'trades']
       }));
     });
-    
+
     socket.on('message', (data) => {
       const message = JSON.parse(data);
       check(message, {
@@ -882,7 +882,7 @@ export default function () {
         'has symbol': (m) => m.symbol === 'BTC-USDT',
       });
     });
-    
+
     socket.setTimeout(() => {
       socket.close();
     }, 60000); // 1 minute
@@ -913,12 +913,12 @@ export default function () {
 
 ## 📚 See Also
 
-- [API.md](API.md) - REST API endpoints
-- [06_EVENT_MODEL_SEQUENCING.md](06_EVENT_MODEL_SEQUENCING.md) - Event sourcing
-- [08_SHARDING_SCALING_DEPLOYMENT.md](08_SHARDING_SCALING_DEPLOYMENT.md) - Scaling strategies
-- [02_ENGINE_ARCHITECTURE.md](02_ENGINE_ARCHITECTURE.md) - Matching engine
+- [API Reference](../api/API.md) - REST API endpoints
+- [Event Sequencing](Event-Sequencing.md) - Event sourcing
+- [Scaling & Deployment](Scaling-Deployment.md) - Scaling strategies
+- [Engine Architecture](Engine-Architecture.md) - Matching engine
 
 ---
 
-**Document Version:** 2.0  
+**Document Version:** 2.0
 **Last Updated:** January 21, 2026

@@ -167,7 +167,7 @@ Ensure the service account has the `cloudkms.cryptoKeyEncrypterDecrypter` role.
 ## Files Created
 
 - [docs/architecture/Custodial-Wallet-System.md](../architecture/Custodial-Wallet-System.md) - Full architecture docs
-- [scripts/db/migrations/003_custodial_wallet_system.sql](../../scripts/db/migrations/003_custodial_wallet_system.sql) - Database schema
+[scripts/db/_archive/migrations/003_custodial_wallet_system.sql](../../scripts/db/_archive/migrations/003_custodial_wallet_system.sql) - Database schema
 - [scripts/deploy/setup-gcp-kms.sh](../../scripts/deploy/setup-gcp-kms.sh) - GCP KMS setup
 - [scripts/init-hd-wallet.ts](../../scripts/init-hd-wallet.ts) - HD wallet initialization
 - `packages/shared/src/services/gcp-kms.service.ts` - KMS encryption

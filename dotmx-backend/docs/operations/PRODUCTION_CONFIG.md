@@ -266,8 +266,8 @@ kong:
 ## 📖 Documentation
 
 - [PRODUCTION_SETUP.md](PRODUCTION_SETUP.md) - Detailed setup guide
-- [docker-compose.yml](docker-compose.yml) - Service configuration
-- [docker/kong.yml](docker/kong.yml) - Kong routing configuration
+- [docker-compose.yml](../../docker-compose.yml) - Service configuration
+- [docker/kong.yml](../../docker/kong.yml) - Kong routing configuration
 
 ## 🎉 Ready to Deploy!
 

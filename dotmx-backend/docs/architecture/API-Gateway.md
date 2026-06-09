@@ -4,8 +4,8 @@
 
 The **API Server** is the primary gateway for external clients and applications to interact with the DotMX exchange. It handles REST API requests, WebSocket connections, and serves as the command dispatcher for the matching engine.
 
-**Port:** 3000  
-**Framework:** ElysiaJS (Bun)  
+**Port:** 3000
+**Framework:** ElysiaJS (Bun)
 **Responsibility:** Request validation, authentication, command dispatch, response formatting
 
 ---
@@ -192,7 +192,7 @@ Common error codes:
 - **Throughput**: ~10,000 orders/sec (limited by downstream engine)
 - **Latency**: <100ms p99 for order submission
 - **WebSocket Scalability**: 50K+ concurrent connections per instance
-- **Rate Limits**: 
+- **Rate Limits**:
   - 100 requests/minute per user (authenticated)
   - 10 requests/minute per IP (unauthenticated)
 
@@ -254,6 +254,6 @@ bun run dev:all
 ## Related Documentation
 
 - [Authentication System](../security/AUTHENTICATION.md)
-- [WebSocket Implementation](../architecture/Websocket-Streaming.md)
+- [Market Data Streaming](../architecture/Market-Data-Streaming.md)
 - [Matching Engine](./Matching-Engine.md)
 - [API Reference](../api/API.md)

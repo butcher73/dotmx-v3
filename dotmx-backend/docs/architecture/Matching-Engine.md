@@ -9,8 +9,8 @@ The **Engine Server** (Port 3001) is the core matching engine responsible for:
 - Emitting events for every state change
 - Enabling event replay and recovery
 
-**Architecture:** Per-market shards with FIFO command ordering  
-**Language:** TypeScript (with Rust option for performance)  
+**Architecture:** Per-market shards with FIFO command ordering
+**Language:** TypeScript (with Rust option for performance)
 **Throughput:** ~100K orders/sec per shard
 
 ---
@@ -82,24 +82,24 @@ Shard "BTC-USD"
 function matchBuyOrder(book: Orderbook, order: Order) {
   while (order.remaining > 0) {
     const bestAsk = book.getBestAsk();
-    
+
     // Price check: can only match asks <= order price
     if (bestAsk.price > order.price) break;
-    
+
     // Get first ask at this level (FIFO)
     const makerOrder = bestAsk.orders[0];
-    
+
     // Self-trade prevention
     if (makerOrder.userId === order.userId) {
       // Apply STP mode (cancel maker/taker/both)
     }
-    
+
     // Calculate fill
     const fillQty = min(order.remaining, makerOrder.remaining);
-    
+
     // Execute trade at maker's price
     trade = createTrade(order, makerOrder, fillQty, makerOrder.price);
-    
+
     // Update both orders
     updateOrder(order, fillQty);
     updateOrder(makerOrder, fillQty);
@@ -222,18 +222,18 @@ if (taker.userId === maker.userId) {
       // Cancel the passive order, continue matching
       cancelOrder(maker);
       break;
-    
+
     case "CANCEL_TAKER":
       // Cancel the incoming order, stop matching
       reject(order);
       break;
-    
+
     case "CANCEL_BOTH":
       // Cancel both orders
       cancelOrder(maker);
       reject(order);
       break;
-    
+
     case "NONE":
       // Allow self-trades
       executeTrade();
@@ -250,7 +250,7 @@ Configurable per market.
 Every significant action emits an event (immutable, append-only):
 
 ```typescript
-type Event = 
+type Event =
   | OrderAcceptedEvent
   | TradeEvent
   | OrderPartiallyFilledEvent
@@ -364,18 +364,18 @@ interface Order {
 ```typescript
 function cancelOrder(orderId: string): Event {
   const order = book.getOrder(orderId);
-  
+
   if (!order) {
     return emitOrderReject(orderId, "NOT_FOUND");
   }
-  
+
   if (order.quantityRemaining === 0) {
     return emitOrderReject(orderId, "ALREADY_FILLED");
   }
-  
+
   // Remove from book
   removeOrder(book, orderId);
-  
+
   // Emit event
   return emitOrderCanceled(orderId, order.quantityRemaining);
 }
@@ -467,6 +467,6 @@ SNAPSHOT_DIR=/var/lib/dotmx/snapshots
 ## Related Documentation
 
 - [Orderbook Data Structures](./Orderbook-Design.md)
-- [Event Model & Sequencing](../architecture/06_EVENT_MODEL_SEQUENCING.md)
+- [Event Model & Sequencing](Event-Sequencing.md)
 - [Risk Management](./Risk-Management.md)
-- [Persistence & Recovery](../architecture/07_PERSISTENCE_REPLAY.md)
+- [Persistence & Recovery](Persistence-Recovery.md)
