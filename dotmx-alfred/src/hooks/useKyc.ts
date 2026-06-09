@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  kycService, 
-  type KycApplication, 
+import {
+  kycService,
+  type KycApplication,
   type KycApplicationDetail,
-  type KycListParams 
+  type KycListParams
 } from '@/services/kyc';
 import type { PaginatedResponse } from '@/libs/api';
 
@@ -18,7 +18,7 @@ export function useKycApplications(initialParams: KycListParams = {}) {
   const fetchApplications = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await kycService.getApplications(params);
       setData(response);
@@ -65,10 +65,10 @@ export function useKycApplication(applicationId: string | null) {
 
   const fetchApplication = useCallback(async () => {
     if (!applicationId) return;
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const data = await kycService.getApplication(applicationId);
       setApplication(data);
@@ -84,11 +84,11 @@ export function useKycApplication(applicationId: string | null) {
   }, [fetchApplication]);
 
   const reviewApplication = async (
-    status: 'approved' | 'rejected' | 'under_review',
+    status: 'approved' | 'rejected' | 'in_review',
     notes?: string
   ) => {
     if (!applicationId) return;
-    
+
     try {
       await kycService.reviewApplication(applicationId, status, notes);
       await fetchApplication();

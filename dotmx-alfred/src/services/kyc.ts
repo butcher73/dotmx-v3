@@ -8,7 +8,7 @@ export interface KycApplication {
   id: string;
   userId: string;
   userEmail: string;
-  status: 'pending' | 'approved' | 'rejected' | 'under_review';
+  status: 'pending' | 'approved' | 'rejected' | 'in_review';
   level: 1 | 2 | 3;
   documentType: string;
   submittedAt: string;
@@ -46,19 +46,19 @@ export const kycService = {
    */
   getApplications: (params: KycListParams = {}) =>
     api.get<PaginatedResponse<KycApplication>>('/kyc', params),
-  
+
   /**
    * Get KYC application details
    */
   getApplication: (applicationId: string) =>
     api.get<KycApplicationDetail>(`/kyc/${applicationId}`),
-  
+
   /**
    * Review KYC application (approve/reject)
    */
   reviewApplication: (
-    applicationId: string, 
-    status: 'approved' | 'rejected' | 'under_review',
+    applicationId: string,
+    status: 'approved' | 'rejected' | 'in_review',
     notes?: string
   ) =>
     api.patch<{ success: boolean }>(`/kyc/${applicationId}/review`, { status, notes })

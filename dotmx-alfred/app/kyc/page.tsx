@@ -32,8 +32,8 @@ export default function KYCPage() {
       setStatus('approved');
     } else if (filter === 'rejected') {
       setStatus('rejected');
-    } else if (filter === 'under_review') {
-      setStatus('under_review');
+    } else if (filter === 'in_review') {
+      setStatus('in_review');
     }
   };
 
@@ -53,25 +53,25 @@ export default function KYCPage() {
     { key: 'user', label: 'User Email' },
     { key: 'level', label: 'KYC Level' },
     { key: 'documentType', label: 'Document Type' },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       label: 'Status',
       render: (value: string) => {
         let color = 'bg-zinc-100 text-zinc-700';
         let Icon = Clock;
         let displayText = value.replace(/_/g, ' ');
-        
+
         if (value === 'approved') {
           color = 'bg-green-100 text-green-700';
           Icon = CheckCircle;
         } else if (value === 'rejected') {
           color = 'bg-red-100 text-red-700';
           Icon = XCircle;
-        } else if (value === 'pending' || value === 'under_review') {
+        } else if (value === 'pending' || value === 'in_review') {
           color = 'bg-yellow-100 text-yellow-700';
           Icon = Clock;
         }
-        
+
         return (
           <span className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium capitalize ${color}`}>
             <Icon className="w-3 h-3" />
@@ -85,17 +85,17 @@ export default function KYCPage() {
   ];
 
   // Calculate stats from current data
-  const pendingCount = applications.filter(a => a.status === 'pending' || a.status === 'under_review').length;
+  const pendingCount = applications.filter(a => a.status === 'pending' || a.status === 'in_review').length;
   const approvedCount = applications.filter(a => a.status === 'approved').length;
   const rejectedCount = applications.filter(a => a.status === 'rejected').length;
 
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      
+
       <div className="flex-1">
         <Header />
-        
+
         <main className="p-8">
           <div className="mb-10">
             <h1 className="text-2xl font-semibold tracking-tight text-text-primary">KYC Management</h1>
@@ -133,49 +133,45 @@ export default function KYCPage() {
           {/* Quick Filters */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex gap-3">
-              <button 
+              <button
                 onClick={() => handleFilterChange('all')}
-                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  selectedFilter === 'all' 
-                    ? 'bg-primary text-primary-foreground' 
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${selectedFilter === 'all'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-transparent border border-border text-text-secondary hover:bg-hover'
-                }`}
+                  }`}
               >
                 All Applications
               </button>
-              <button 
+              <button
                 onClick={() => handleFilterChange('pending')}
-                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  selectedFilter === 'pending' 
-                    ? 'bg-primary text-primary-foreground' 
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${selectedFilter === 'pending'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-transparent border border-border text-text-secondary hover:bg-hover'
-                }`}
+                  }`}
               >
                 Pending Review
               </button>
-              <button 
+              <button
                 onClick={() => handleFilterChange('approved')}
-                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  selectedFilter === 'approved' 
-                    ? 'bg-primary text-primary-foreground' 
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${selectedFilter === 'approved'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-transparent border border-border text-text-secondary hover:bg-hover'
-                }`}
+                  }`}
               >
                 Approved
               </button>
-              <button 
+              <button
                 onClick={() => handleFilterChange('rejected')}
-                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  selectedFilter === 'rejected' 
-                    ? 'bg-primary text-primary-foreground' 
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${selectedFilter === 'rejected'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-transparent border border-border text-text-secondary hover:bg-hover'
-                }`}
+                  }`}
               >
                 Rejected
               </button>
             </div>
 
-            <button 
+            <button
               onClick={() => refetch()}
               disabled={isLoading}
               className="flex items-center gap-2 px-4 py-2.5 border border-border text-text-secondary rounded-xl hover:bg-hover transition-all duration-200 text-sm"
@@ -209,7 +205,7 @@ export default function KYCPage() {
                     Showing {((pagination.page - 1) * pagination.pageSize) + 1}-{Math.min(pagination.page * pagination.pageSize, pagination.totalItems)} of {pagination.totalItems.toLocaleString()} applications
                   </p>
                   <div className="flex items-center gap-3">
-                    <button 
+                    <button
                       onClick={() => setPage(pagination.page - 1)}
                       disabled={pagination.page <= 1}
                       className="px-4 py-2.5 border border-border text-text-secondary rounded-xl hover:bg-hover text-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -219,7 +215,7 @@ export default function KYCPage() {
                     <span className="px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium">
                       {pagination.page}
                     </span>
-                    <button 
+                    <button
                       onClick={() => setPage(pagination.page + 1)}
                       disabled={pagination.page >= pagination.totalPages}
                       className="px-4 py-2.5 border border-border text-text-secondary rounded-xl hover:bg-hover text-sm disabled:opacity-50 disabled:cursor-not-allowed"

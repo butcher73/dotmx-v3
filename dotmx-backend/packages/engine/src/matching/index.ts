@@ -35,11 +35,6 @@ export interface MatchingEngineConfig {
   risk: RiskConfig;
   selfTradePreventionEnabled: boolean;
   selfTradePreventionMode: "CANCEL_MAKER" | "CANCEL_TAKER" | "CANCEL_BOTH";
-  /** Fee rates for maker/taker. Can be overridden per-user via feeProvider */
-  defaultMakerFeeRate: number;
-  defaultTakerFeeRate: number;
-  /** Optional callback to get user-specific fee rates */
-  feeProvider?: (userId: string) => { makerRate: number; takerRate: number };
 }
 
 /** Stored stop order awaiting trigger */
@@ -51,13 +46,10 @@ export interface StopOrderEntry {
 }
 
 // Note: Fee calculation has been moved to TradeSettlementService.
-// These defaults are retained for backward compatibility but are no longer used.
 export const defaultMatchingConfig: MatchingEngineConfig = {
   risk: defaultRiskConfig,
   selfTradePreventionEnabled: true,
   selfTradePreventionMode: "CANCEL_MAKER",
-  defaultMakerFeeRate: 0.001,  // 0.10% (10 bps)
-  defaultTakerFeeRate: 0.002,  // 0.20% (20 bps)
 };
 
 /**

@@ -512,23 +512,15 @@ export class PerpetualFeeService {
     const secs = from.getUTCSeconds();
     const intervalHours = this.fundingConfig.interval_hours;
 
-    // Compute next interval boundary. If exactly on a boundary (00:00, 08:00, 16:00)
-    // and seconds have elapsed, advance to next interval.
-    const nextFundingHour = Math.ceil(hours / intervalHours) * intervalHours;
+    // Compute next interval boundary. Always return the next 8-hour mark.
+    // Example: at 07:59 → floor(7/8)=0 → (0+1)*8=8 (correct: 08:00)
+    // Example: at 08:00:00 → floor(8/8)=1 → (1+1)*8=16 (correct: 16:00)
+    const nextFundingHour = (Math.floor(hours / intervalHours) + 1) * intervalHours;
 
     const next = new Date(from);
     next.setUTCHours(nextFundingHour % 24, 0, 0, 0);
     if (nextFundingHour >= 24) {
       next.setUTCDate(next.getUTCDate() + 1);
-    }
-
-    // If the computed time is in the past (we're exactly at or past the boundary),
-    // advance to the next interval
-    if (next.getTime() <= from.getTime()) {
-      next.setUTCHours((next.getUTCHours() + intervalHours) % 24, 0, 0, 0);
-      if (next.getTime() <= from.getTime()) {
-        next.setUTCDate(next.getUTCDate() + 1);
-      }
     }
 
     return next;

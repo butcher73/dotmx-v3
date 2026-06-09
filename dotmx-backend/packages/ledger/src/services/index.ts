@@ -125,9 +125,12 @@ export function createFundingService(
     scheduleNext(): void {
       if (timer) return;
 
-      // Calculate time until next funding interval
+      // Calculate time until next funding interval.
+      // floor finds the current boundary, +1 advances to the next one.
+      // This ensures we never schedule in the past.
       const now = Date.now();
-      const nextFunding = Math.ceil(now / config.intervalMs) * config.intervalMs;
+      const currentBoundary = Math.floor(now / config.intervalMs) * config.intervalMs;
+      const nextFunding = currentBoundary + config.intervalMs;
       const delay = nextFunding - now;
 
       timer = setTimeout(async () => {
@@ -147,7 +150,7 @@ export function createFundingService(
           }
         }
 
-        // Schedule next interval
+        // Re-schedule: re-aligns to the next interval boundary
         this.scheduleNext();
       }, delay);
     },

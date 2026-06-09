@@ -1007,6 +1007,63 @@ export function createAuthRoutes(
     )
 
     /**
+     * Login with 2FA backup code
+     * Allows users to bypass 2FA using a one-time backup code.
+     */
+    .post(
+      '/2fa/backup-code',
+      async ({ body, user, set }) => {
+        // This route does NOT require 2FA — it's the escape hatch
+        const currentUser = user ? getUser({ user }) : null;
+        if (!currentUser) {
+          set.status = 401;
+          return { error: 'Authentication required' };
+        }
+
+        const { createHash } = await import('crypto');
+        const hashedInput = createHash('sha256').update(body.code.toUpperCase()).digest('hex');
+
+        // Fetch user's backup codes
+        const twoFaRecord = await db.queryOne<{ totp_backup_codes: string[]; enabled: boolean }>(
+          `SELECT totp_backup_codes, enabled FROM user_2fa WHERE user_id = $1`,
+          [currentUser.id]
+        );
+
+        if (!twoFaRecord) {
+          set.status = 400;
+          return { error: '2FA is not set up for this account' };
+        }
+
+        if (!twoFaRecord.enabled) {
+          set.status = 400;
+          return { error: '2FA is not enabled on this account' };
+        }
+
+        // Check if the code matches any backup code
+        const codes = twoFaRecord.totp_backup_codes || [];
+        const matchIndex = codes.findIndex(c => c === hashedInput);
+
+        if (matchIndex === -1) {
+          return { error: 'Invalid backup code' };
+        }
+
+        // Remove the used backup code (one-time use)
+        codes.splice(matchIndex, 1);
+        await db.query(
+          `UPDATE user_2fa SET totp_backup_codes = $1, updated_at = CURRENT_TIMESTAMP WHERE user_id = $2`,
+          [JSON.stringify(codes), currentUser.id]
+        );
+
+        return { success: true, message: 'Backup code accepted. 2FA bypassed for this session.' };
+      },
+      {
+        body: t.Object({
+          code: t.String({ minLength: 8, maxLength: 8 }),
+        }),
+      }
+    )
+
+    /**
      * Disable 2FA
      */
     .post(
