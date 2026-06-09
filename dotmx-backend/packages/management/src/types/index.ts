@@ -19,7 +19,7 @@ export interface UserListItem {
   firstName: string | null;
   lastName: string | null;
   role: string;
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
+  status: 'active' | 'suspended' | 'banned' | 'deleted';
   kycStatus: 'none' | 'pending' | 'approved' | 'rejected';
   emailVerified: boolean;
   createdAt: string;

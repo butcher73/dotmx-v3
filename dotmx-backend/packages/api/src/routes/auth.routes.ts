@@ -1016,7 +1016,7 @@ export function createAuthRoutes(
 
         // First verify password
         const userRecord = await db.queryOne<{ password_hash: string }>(
-          `SELECT password_hash FROM users WHERE id = $1`,
+          `SELECT password_hash FROM users WHERE id = $1 AND deleted_at IS NULL`,
           [currentUser.id]
         );
 

@@ -266,18 +266,17 @@ impl Position {
         self.entry_price = div_decimal(old_notional + new_notional, total_size);
         self.size = total_size;
 
-        // Calculate margin: if leverage changed, recalculate total; otherwise add new portion
+        // Calculate margin: preserve actual deposited margin
+        // The position's `self.margin` tracks the actual margin deducted from the
+        // user's account (not a theoretical value recalculated from entry price),
+        // so that margin accounting remains consistent across increase/decrease.
         let old_margin = self.margin;
-        if self.leverage != leverage {
-            // Leverage changed — recalculate entire margin at new leverage
-            self.margin = calculate_margin(self.entry_price, self.size, leverage);
-        } else {
-            // Same leverage — add margin for the new portion only
-            // This preserves the original margin that was actually deducted from the account
-            let new_portion_margin = calculate_margin(price, additional_size, leverage);
-            self.margin = old_margin + new_portion_margin;
-        }
+        let new_portion_margin = calculate_margin(price, additional_size, leverage);
+        self.margin = old_margin + new_portion_margin;
         self.leverage = leverage;
+
+        // Liquidation price is recalculated with the *actual* margin deposited,
+        // so that any extra margin the user added is correctly factored in.
         self.liquidation_price = match self.side {
             PositionSide::Long => liquidation_price_long(
                 self.entry_price,
@@ -316,11 +315,18 @@ impl Position {
         self.size -= close_size;
 
         let old_margin = self.margin;
+        let old_size = self.size + close_size;
         let released_margin: Decimal;
 
-        // Recalculate margin for remaining position
         if self.size > 0 {
-            self.margin = calculate_margin(self.entry_price, self.size, self.leverage);
+            // Pro-rata margin release: margin_per_unit = old_margin / old_size,
+            // released = margin_per_unit * close_size. This preserves any extra
+            // margin the user deposited (beyond the theoretical minimum) rather
+            // than recalculating from entry price, which could lose that excess.
+            let margin_per_unit = div_decimal(old_margin, old_size);
+            released_margin = mul_decimal(margin_per_unit, close_size);
+            self.margin = old_margin - released_margin;
+
             self.liquidation_price = match self.side {
                 PositionSide::Long => liquidation_price_long(
                     self.entry_price,
@@ -335,7 +341,6 @@ impl Position {
                     maintenance_margin_rate,
                 ),
             };
-            released_margin = old_margin - self.margin;
         } else {
             self.margin = 0;
             released_margin = old_margin; // All margin released on full close

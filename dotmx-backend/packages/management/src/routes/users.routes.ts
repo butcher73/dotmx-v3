@@ -343,7 +343,7 @@ export function createUsersRoutes(db: DatabaseService) {
           );
 
           // If suspending or deactivating user, revoke all their active sessions
-          if (body.status === 'suspended' || body.status === 'inactive' || body.status === 'closed') {
+          if (body.status === 'suspended' || body.status === 'banned' || body.status === 'deleted') {
             await db.query(
               `UPDATE sessions SET revoked = TRUE, revoked_at = NOW(), revoked_reason = 'User status changed to ' || $1 WHERE user_id = $2 AND revoked = FALSE`,
               [body.status, params.userId]
@@ -363,9 +363,9 @@ export function createUsersRoutes(db: DatabaseService) {
         body: t.Object({
           status: t.Union([
             t.Literal('active'),
-            t.Literal('inactive'),
             t.Literal('suspended'),
-            t.Literal('pending')
+            t.Literal('banned'),
+            t.Literal('deleted')
           ])
         }),
         detail: {

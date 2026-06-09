@@ -185,9 +185,10 @@ export function createKycRoutes(db: DatabaseService) {
             );
 
             if (app) {
-              // Update dedicated KYC columns (the canonical source)
+              // Update dedicated KYC columns (the canonical source).
+              // Schema uses kyc_verified (boolean); approved_at is on kyc_applications.
               await db.query(
-                `UPDATE users SET kyc_status = 'approved', kyc_level = $1, updated_at = NOW() WHERE id = $2`,
+                `UPDATE users SET kyc_verified = TRUE, kyc_level = $1, updated_at = NOW() WHERE id = $2`,
                 [app.level, app.user_id]
               );
               // Also maintain backward compatibility in metadata
@@ -206,7 +207,7 @@ export function createKycRoutes(db: DatabaseService) {
             );
             if (app) {
               await db.query(
-                `UPDATE users SET kyc_status = 'rejected', updated_at = NOW() WHERE id = $1`,
+                `UPDATE users SET kyc_verified = FALSE, updated_at = NOW() WHERE id = $1`,
                 [app.user_id]
               );
             }

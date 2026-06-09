@@ -11,7 +11,7 @@ export interface UserListItem {
   firstName: string | null;
   lastName: string | null;
   role: string;
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
+  status: 'active' | 'suspended' | 'banned' | 'deleted';
   kycStatus: 'none' | 'pending' | 'approved' | 'rejected';
   emailVerified: boolean;
   createdAt: string;
@@ -59,25 +59,25 @@ export const usersService = {
    */
   getUsers: (params: UsersListParams = {}) =>
     api.get<PaginatedResponse<UserListItem>>('/users', params),
-  
+
   /**
    * Get user details
    */
   getUser: (userId: string) =>
     api.get<UserDetail>(`/users/${userId}`),
-  
+
   /**
    * Update user status
    */
   updateStatus: (userId: string, status: UserListItem['status']) =>
     api.patch<{ success: boolean }>(`/users/${userId}/status`, { status }),
-  
+
   /**
    * Update user role
    */
   updateRole: (userId: string, role: string) =>
     api.patch<{ success: boolean }>(`/users/${userId}/role`, { role }),
-  
+
   /**
    * Update user profile information
    */
@@ -88,7 +88,7 @@ export const usersService = {
     lastName?: string;
   }) =>
     api.patch<{ success: boolean; user: UserDetail }>(`/users/${userId}`, data),
-  
+
   /**
    * Change user password (admin)
    */

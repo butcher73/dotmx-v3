@@ -57,46 +57,45 @@ export default function UsersPage() {
   }));
 
   const columns = [
-    { 
-      key: 'id', 
+    {
+      key: 'id',
       label: 'ID',
       render: (value: string) => value.slice(0, 8) // Only display first 8 chars
     },
     { key: 'email', label: 'Email' },
     { key: 'name', label: 'Name' },
-    { key: 'role', label: 'Role',
+    {
+      key: 'role', label: 'Role',
       render: (value: string) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          value === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-zinc-100 text-zinc-700'
-        }`}>
+        <span className={`px-2 py-1 rounded text-xs font-medium ${value === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-zinc-100 text-zinc-700'
+          }`}>
           {value}
         </span>
       )
     },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       label: 'Status',
       render: (value: string) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          value === 'active' ? 'bg-green-100 text-green-700' : 
+        <span className={`px-2 py-1 rounded text-xs font-medium ${value === 'active' ? 'bg-green-100 text-green-700' :
           value === 'suspended' ? 'bg-red-100 text-red-700' :
-          value === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-          'bg-zinc-100 text-zinc-700'
-        }`}>
+            value === 'banned' ? 'bg-red-200 text-red-800' :
+              value === 'deleted' ? 'bg-gray-200 text-gray-600' :
+                'bg-zinc-100 text-zinc-700'
+          }`}>
           {value}
         </span>
       )
     },
-    { 
-      key: 'kyc', 
+    {
+      key: 'kyc',
       label: 'KYC Status',
       render: (value: string) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          value === 'approved' ? 'bg-blue-100 text-blue-700' : 
-          value === 'pending' ? 'bg-yellow-100 text-yellow-700' : 
-          value === 'rejected' ? 'bg-red-100 text-red-700' :
-          'bg-zinc-100 text-zinc-700'
-        }`}>
+        <span className={`px-2 py-1 rounded text-xs font-medium ${value === 'approved' ? 'bg-blue-100 text-blue-700' :
+          value === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+            value === 'rejected' ? 'bg-red-100 text-red-700' :
+              'bg-zinc-100 text-zinc-700'
+          }`}>
           {value === 'none' ? 'Not Started' : value}
         </span>
       )
@@ -156,10 +155,10 @@ export default function UsersPage() {
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      
+
       <div className="flex-1">
         <Header />
-        
+
         <main className="p-8">
           <div className="mb-10">
             <h1 className="text-2xl font-semibold text-text-primary tracking-tight">Users</h1>
@@ -179,7 +178,7 @@ export default function UsersPage() {
                   className="pl-10 pr-4 py-2.5 w-64 border border-border rounded-xl bg-surface text-text-primary text-sm placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </form>
-              
+
               <select
                 value={selectedStatus}
                 onChange={(e) => handleStatusChange(e.target.value)}
@@ -187,12 +186,12 @@ export default function UsersPage() {
               >
                 <option value="">All Status</option>
                 <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
                 <option value="suspended">Suspended</option>
-                <option value="pending">Pending</option>
+                <option value="banned">Banned</option>
+                <option value="deleted">Deleted</option>
               </select>
 
-              <button 
+              <button
                 onClick={() => refetch()}
                 className="flex items-center gap-2 px-4 py-2.5 border border-border text-text-secondary rounded-xl hover:bg-hover transition-all duration-200 text-sm"
               >
@@ -200,7 +199,7 @@ export default function UsersPage() {
                 Refresh
               </button>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <button className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-all duration-200 text-sm font-medium">
                 <UserPlus className="w-4 h-4" />
@@ -228,10 +227,10 @@ export default function UsersPage() {
           ) : (
             <>
               {/* Users Table */}
-              <DataTable 
-                columns={columns} 
-                data={tableData} 
-                onRowClick={(user) => console.log('User clicked:', user)} 
+              <DataTable
+                columns={columns}
+                data={tableData}
+                onRowClick={(user) => console.log('User clicked:', user)}
               />
 
               {/* Pagination */}
@@ -241,32 +240,31 @@ export default function UsersPage() {
                     Showing {((pagination.page - 1) * pagination.pageSize) + 1}-{Math.min(pagination.page * pagination.pageSize, pagination.totalItems)} of {pagination.totalItems.toLocaleString()} users
                   </p>
                   <div className="flex items-center gap-1">
-                    <button 
+                    <button
                       onClick={() => setPage(pagination.page - 1)}
                       disabled={pagination.page <= 1}
                       className="px-3 py-1.5 border border-border text-text-secondary rounded-lg hover:bg-hover text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Previous
                     </button>
-                    
+
                     {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                       const pageNum = i + 1;
                       return (
-                        <button 
+                        <button
                           key={pageNum}
                           onClick={() => setPage(pageNum)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                            pagination.page === pageNum 
-                              ? 'bg-primary text-primary-foreground' 
-                              : 'border border-border text-text-secondary hover:bg-hover'
-                          }`}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${pagination.page === pageNum
+                            ? 'bg-primary text-primary-foreground'
+                            : 'border border-border text-text-secondary hover:bg-hover'
+                            }`}
                         >
                           {pageNum}
                         </button>
                       );
                     })}
-                    
-                    <button 
+
+                    <button
                       onClick={() => setPage(pagination.page + 1)}
                       disabled={pagination.page >= pagination.totalPages}
                       className="px-3 py-1.5 border border-border text-text-secondary rounded-lg hover:bg-hover text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"

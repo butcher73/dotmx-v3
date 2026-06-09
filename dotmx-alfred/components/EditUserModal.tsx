@@ -144,22 +144,20 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }: Edit
         <div className="flex border-b border-border px-6">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'profile'
+            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'profile'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-text-tertiary hover:text-text-secondary'
-            }`}
+              }`}
           >
             <User className="w-4 h-4 inline-block mr-2" />
             Profile Information
           </button>
           <button
             onClick={() => setActiveTab('password')}
-            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'password'
+            className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'password'
                 ? 'border-primary text-primary'
                 : 'border-transparent text-text-tertiary hover:text-text-secondary'
-            }`}
+              }`}
           >
             <Lock className="w-4 h-4 inline-block mr-2" />
             Change Password
@@ -280,9 +278,9 @@ export default function EditUserModal({ user, isOpen, onClose, onSuccess }: Edit
                   className="w-full px-4 py-2.5 border border-border rounded-xl bg-background text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 >
                   <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
                   <option value="suspended">Suspended</option>
-                  <option value="pending">Pending</option>
+                  <option value="banned">Banned</option>
+                  <option value="deleted">Deleted</option>
                 </select>
               </div>
 

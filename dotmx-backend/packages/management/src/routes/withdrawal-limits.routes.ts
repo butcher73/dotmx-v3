@@ -105,7 +105,9 @@ export function createWithdrawalLimitsRoutes(db: DatabaseService) {
               [params.userId]
             );
 
-            const tier = user?.kyc_level === "verified" ? "verified" : "default";
+            // kyc_level is an integer (0=none, 1=basic, 2=verified, 3=enhanced)
+            const kycLevel = parseInt(user?.kyc_level || '0', 10);
+            const tier = kycLevel >= 2 ? "verified" : (kycLevel >= 1 ? "basic" : "default");
             source = `tier:${tier}`;
 
             effectiveLimits = await db.queryOne(
@@ -137,7 +139,7 @@ export function createWithdrawalLimitsRoutes(db: DatabaseService) {
             count: string;
           }>(
             `SELECT COALESCE(SUM(amount_usd), 0) as total_usd, COUNT(*) as count
-             FROM withdrawal_usage 
+             FROM withdrawal_usage
              WHERE user_id = $1 AND timestamp > NOW() - INTERVAL '24 hours'`,
             [params.userId]
           );
@@ -147,7 +149,7 @@ export function createWithdrawalLimitsRoutes(db: DatabaseService) {
             count: string;
           }>(
             `SELECT COALESCE(SUM(amount_usd), 0) as total_usd, COUNT(*) as count
-             FROM withdrawal_usage 
+             FROM withdrawal_usage
              WHERE user_id = $1 AND timestamp > NOW() - INTERVAL '30 days'`,
             [params.userId]
           );
@@ -177,12 +179,12 @@ export function createWithdrawalLimitsRoutes(db: DatabaseService) {
                 remainingUsd: Math.max(
                   0,
                   parseFloat(effectiveLimits.daily_limit_usd) -
-                    (dailyUsage ? parseFloat(dailyUsage.total_usd) : 0)
+                  (dailyUsage ? parseFloat(dailyUsage.total_usd) : 0)
                 ),
                 remainingCount: Math.max(
                   0,
                   effectiveLimits.daily_withdrawal_count -
-                    (dailyUsage ? parseInt(dailyUsage.count) : 0)
+                  (dailyUsage ? parseInt(dailyUsage.count) : 0)
                 ),
               },
               monthly: {
@@ -191,12 +193,12 @@ export function createWithdrawalLimitsRoutes(db: DatabaseService) {
                 remainingUsd: Math.max(
                   0,
                   parseFloat(effectiveLimits.monthly_limit_usd) -
-                    (monthlyUsage ? parseFloat(monthlyUsage.total_usd) : 0)
+                  (monthlyUsage ? parseFloat(monthlyUsage.total_usd) : 0)
                 ),
                 remainingCount: Math.max(
                   0,
                   effectiveLimits.monthly_withdrawal_count -
-                    (monthlyUsage ? parseInt(monthlyUsage.count) : 0)
+                  (monthlyUsage ? parseInt(monthlyUsage.count) : 0)
                 ),
               },
             },

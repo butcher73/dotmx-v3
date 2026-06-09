@@ -83,8 +83,22 @@ export function createAdvancedTradingRoutes(
         }
 
         try {
+          // Calculate estimated price for market orders using last trade price
+          let estimatedPrice = body.price;
+          if (!estimatedPrice && body.type === "MARKET") {
+            const lastTrade = await db.queryOne<{ price: string }>(
+              `SELECT price FROM trades WHERE symbol = $1 ORDER BY timestamp DESC LIMIT 1`,
+              [body.symbol]
+            );
+            if (!lastTrade) {
+              set.status = 422;
+              return { error: "No recent trades for this symbol; cannot estimate market order price" };
+            }
+            estimatedPrice = parseFloat(lastTrade.price);
+          }
+
           // Calculate required margin
-          const notional = body.quantity * (body.price ?? 0);
+          const notional = body.quantity * (estimatedPrice ?? 0);
           const requiredMargin = notional / body.leverage;
 
           // Check user has sufficient balance
@@ -105,6 +119,14 @@ export function createAdvancedTradingRoutes(
             };
           }
 
+          // Lock margin BEFORE placing order to prevent race with engine settlement
+          await db.query(
+            `UPDATE user_balances
+             SET available = available - $1, locked = locked + $1
+             WHERE user_id = $2 AND asset = $3`,
+            [requiredMargin, currentUser.id, body.marginAsset ?? "USDT"]
+          );
+
           // Place order via gateway
           const result = await gateway.placeOrder({
             userId: currentUser.id,
@@ -119,17 +141,16 @@ export function createAdvancedTradingRoutes(
           });
 
           if (!result.success) {
+            // Rollback margin lock on rejection
+            await db.query(
+              `UPDATE user_balances
+               SET available = available + $1, locked = locked - $1
+               WHERE user_id = $2 AND asset = $3`,
+              [requiredMargin, currentUser.id, body.marginAsset ?? "USDT"]
+            );
             set.status = 400;
             return { error: result.error ?? "Order rejected" };
           }
-
-          // Record position margin lock (in a transaction)
-          await db.query(
-            `UPDATE user_balances
-             SET available = available - $1, locked = locked + $1
-             WHERE user_id = $2 AND asset = $3`,
-            [requiredMargin, currentUser.id, body.marginAsset ?? "USDT"]
-          );
 
           return {
             orderId: result.orderId,
