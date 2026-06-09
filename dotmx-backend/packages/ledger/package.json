@@ -1,0 +1,20 @@
+{
+  "name": "@dotmx/ledger",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DotMX Ledger - Balances, positions, deterministic state (Phase 2)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@dotmx/shared": "workspace:*"
+  }
+}

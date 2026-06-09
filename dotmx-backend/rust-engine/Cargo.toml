@@ -1,0 +1,71 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/dotmx-core",
+    "crates/dotmx-risk",
+    "crates/dotmx-transport",
+    "crates/dotmx-engine",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["DotMX Team"]
+license = "MIT"
+repository = "https://github.com/dotmx/dotmx-matching-engine"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# NATS messaging
+async-nats = "0.33"
+
+# Logging & tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Performance
+parking_lot = "0.12"
+dashmap = "5.5"
+crossbeam-channel = "0.5"
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID
+uuid = { version = "1.6", features = ["v4", "serde"] }
+
+# Configuration
+config = "0.14"
+dotenvy = "0.15"
+
+# Metrics
+metrics = "0.22"
+metrics-exporter-prometheus = "0.13"
+
+# Async
+futures = "0.3"
+
+# Testing
+criterion = "0.5"
+proptest = "1.4"
+
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+opt-level = 3
+
+[profile.bench]
+lto = true
+codegen-units = 1

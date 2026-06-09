@@ -1,0 +1,342 @@
+name: Build, Scan, Approve, Push
+
+on:
+  push:
+    branches: [main]  # auto deploy on main
+  workflow_dispatch:
+
+env:
+  REGION: asia-southeast1
+  PROJECT_ID: logical-pathway-481512-g2
+  REPOSITORY: dotmx-v3-backend
+  REG_HOST: asia-southeast1-docker.pkg.dev
+  REG_PATH: asia-southeast1-docker.pkg.dev/logical-pathway-481512-g2/dotmx-v3-backend
+
+jobs:
+  sast:
+    name: SAST (CodeQL)
+    if: false  # scans disabled for test flow
+    runs-on: ubuntu-latest
+    env:
+      CODEQL_ACTION_UPLOAD_SARIF: "false"  # hard-disable uploads even on failure paths
+      CODEQL_ACTION_SARIF_RESULTS_OUTPUT_DIR: "./results"  # write SARIF inside workspace
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: javascript
+      - uses: github/codeql-action/analyze@v4
+        with:
+          upload: false           # don't send SARIF to GitHub Code Scanning
+      - name: Summarize CodeQL findings
+        if: always()
+        run: |
+          set -e
+          if ls results/*.sarif >/dev/null 2>&1; then
+            echo "::group::CodeQL summary"
+            ls -lh results/*.sarif
+            echo "- Counts by level/severity:"
+            jq -r '.[].runs[]?.results[]? | (.properties?.severity // .level // "unknown")' results/*.sarif \
+              | tr '[:lower:]' '[:upper:]' | sort | uniq -c
+            echo "- Top findings (level, ruleId, message):"
+            jq -r '.[].runs[]?.results[]? | "\((.properties?.severity // .level // "UNKNOWN"))\t\(.ruleId // "no-rule")\t\(.message.text // "no message")"' results/*.sarif \
+              | head -n 40 || true
+            echo "::endgroup::"
+          else
+            echo "No SARIF results were generated."
+          fi
+
+  gate_sast:
+    name: Approve SAST Results
+    if: false  # scans disabled for test flow
+    needs: sast
+    runs-on: ubuntu-latest
+    environment: approval-sast
+    steps:
+      - run: echo "ตรวจผล CodeQL ใน log (สรุปท้าย job) แล้วกด Approve"
+
+  secret_scan:
+    name: Secret Scan (Gitleaks)
+    if: false  # scans disabled for test flow
+    needs: gate_sast
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          VERSION="${GITLEAKS_VERSION:-v8.30.0}"
+          OS="linux"
+          ARCH_RAW="$(uname -m)"
+          case "$ARCH_RAW" in
+            x86_64|amd64) ARCH="x64" ;;
+            aarch64|arm64) ARCH="arm64" ;;
+            armv7l|armv7) ARCH="armv7" ;;
+            armv6l|armv6) ARCH="armv6" ;;
+            i386|i686) ARCH="x32" ;;
+            *) echo "Unsupported arch: $ARCH_RAW" >&2; exit 1 ;;
+          esac
+          URL="https://github.com/gitleaks/gitleaks/releases/download/${VERSION}/gitleaks_${VERSION#v}_${OS}_${ARCH}.tar.gz"
+          echo "Downloading $URL"
+          mkdir -p /tmp/gitleaks
+          curl -sSfL "$URL" -o /tmp/gitleaks/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks/gitleaks.tar.gz -C /tmp/gitleaks
+          chmod +x /tmp/gitleaks/gitleaks
+          echo "/tmp/gitleaks" >> "$GITHUB_PATH"
+          /tmp/gitleaks/gitleaks version
+      - name: Run gitleaks
+        run: |
+          # run detect but do not fail the job on leaks; exit 0 always
+          gitleaks detect --redact --report-format json --report-path gitleaks-report.json --log-level=warn || true
+      - name: Summarize Gitleaks findings
+        if: always()
+        run: |
+          if [ -f gitleaks-report.json ]; then
+            count=$(jq 'if type=="array" then length elif .findings then (.findings|length) else 0 end' gitleaks-report.json)
+            echo "Gitleaks findings: ${count}"
+            echo "Top findings (rule, file, line):"
+            jq -r 'if type=="array" then .[] else .findings[] end | "\(.RuleID // "no-rule")\t\(.File // "no-file")\tline \(.StartLine // 0)"' gitleaks-report.json | head -n 40 || true
+          else
+            echo "No gitleaks report generated."
+          fi
+
+  gate_secret:
+    name: Approve Secret Scan
+    if: false  # scans disabled for test flow
+    needs: secret_scan
+    runs-on: ubuntu-latest
+    environment: approval-secret
+    steps:
+      - run: echo "ตรวจผล Gitleaks summary ใน log แล้วกด Approve"
+
+  sca_fs:
+    name: SCA / CVE (Trivy FS)
+    if: false  # scans disabled for test flow
+    needs: gate_secret
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+      - name: Summarize Trivy FS findings
+        if: always()
+        run: |
+          if [ -f trivy-fs.sarif ]; then
+            echo "::group::Trivy FS summary"
+            echo "Trivy FS SARIF: $(du -h trivy-fs.sarif | cut -f1)"
+            echo "- Counts by severity:"
+            jq -r '.[].runs[]?.results[]? | (.properties?.severity // .level // "UNKNOWN")' trivy-fs.sarif \
+              | tr '[:lower:]' '[:upper:]' | sort | uniq -c
+            echo "- Top findings (severity, ruleId, message):"
+            jq -r '.[].runs[]?.results[]? | "\((.properties?.severity // .level // "UNKNOWN"))\t\(.ruleId // "no-rule")\t\(.message.text // "no message")"' trivy-fs.sarif \
+              | head -n 40 || true
+            echo "::endgroup::"
+          else
+            echo "No Trivy FS SARIF generated."
+          fi
+
+  gate_sca:
+    name: Approve SCA
+    if: false  # scans disabled for test flow
+    needs: sca_fs
+    runs-on: ubuntu-latest
+    environment: approval-sca
+    steps:
+      - run: echo "ตรวจ Trivy FS summary ใน log แล้ว Approve"
+
+  image_scan:
+    name: Image Scan (Build + Trivy)
+    if: false  # scans disabled for test flow
+    needs: gate_sca
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: api
+            file: docker/Dockerfile.api
+          - name: engine-ts
+            file: docker/Dockerfile.engine
+          - name: marketdata
+            file: docker/Dockerfile.marketdata
+          - name: engine-rust
+            file: docker/Dockerfile.rust-engine
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auth to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Ensure Artifact Registry repo exists
+        run: |
+          set -e
+          gcloud artifacts repositories describe "$REPOSITORY" --location="$REGION" \
+            || gcloud artifacts repositories create "$REPOSITORY" \
+                 --repository-format=docker \
+                 --location="$REGION" \
+                 --description="DotMX images"
+
+      - name: Configure docker auth
+        run: gcloud auth configure-docker $REG_HOST --quiet
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.file }}
+          tags: ${{ env.REG_PATH }}/${{ matrix.name }}:${{ github.sha }}
+          load: true
+          push: false
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: ${{ env.REG_PATH }}/${{ matrix.name }}:${{ github.sha }}
+          format: sarif
+          output: trivy-image-${{ matrix.name }}.sarif
+          severity: CRITICAL,HIGH,MEDIUM,LOW,UNKNOWN
+          exit-code: 0
+      - name: Summarize Trivy image findings
+        if: always()
+        run: |
+          FILE="trivy-image-${{ matrix.name }}.sarif"
+          if [ -f "$FILE" ]; then
+            echo "::group::Trivy image summary: $FILE"
+            echo "Size: $(du -h "$FILE" | cut -f1)"
+            echo "- Counts by severity:"
+            jq -r '.[].runs[]?.results[]? | (.properties?.severity // .level // "UNKNOWN")' "$FILE" \
+              | tr '[:lower:]' '[:upper:]' | sort | uniq -c
+            echo "- Top findings (severity, ruleId, message):"
+            jq -r '.[].runs[]?.results[]? | "\((.properties?.severity // .level // "UNKNOWN"))\t\(.ruleId // "no-rule")\t\(.message.text // "no message")"' "$FILE" \
+              | head -n 40 || true
+            echo "::endgroup::"
+          else
+            echo "No Trivy image SARIF generated for $FILE."
+          fi
+
+  gate_image:
+    name: Approve Image Scan
+    if: false  # scans disabled for test flow
+    needs: image_scan
+    runs-on: ubuntu-latest
+    environment: approval-image
+    steps:
+      - run: echo "ตรวจ Trivy image summary ใน log แล้ว Approve"
+
+  # dast:
+  #   name: DAST (OWASP ZAP)
+  #   needs: gate_image
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     TARGET_URL: ${{ vars.DAST_TARGET_URL }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Check target URL
+  #       run: |
+  #         if [ -z "$TARGET_URL" ]; then
+  #           echo "DAST_TARGET_URL not set" >&2
+  #           exit 1
+  #         fi
+  #     - name: ZAP baseline scan
+  #       uses: zaproxy/action-baseline@v0.15.0
+  #       with:
+  #         target: ${{ env.TARGET_URL }}
+  #         cmd_options: "-I"
+  #     - name: Upload ZAP report
+  #       uses: actions/upload-artifact@v4
+  #       if: always()
+  #       with:
+  #         name: zap-report
+  #         path: report.html
+
+  # gate_dast:
+  #   name: Approve DAST
+  #   needs: dast
+  #   runs-on: ubuntu-latest
+  #   environment: approval-dast
+  #   steps:
+  #     - run: echo "ตรวจ ZAP report (artifact report.html) แล้ว Approve"
+
+  push_images:
+    name: Push Images to Artifact Registry
+    # run without scan gates for test flow
+    needs: []
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: api
+            file: docker/Dockerfile.api
+          - name: engine-ts
+            file: docker/Dockerfile.engine
+          - name: marketdata
+            file: docker/Dockerfile.marketdata
+          - name: engine-rust
+            file: docker/Dockerfile.rust-engine
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auth to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: Ensure Artifact Registry repo exists
+        run: |
+          set -e
+          gcloud artifacts repositories describe "$REPOSITORY" --location="$REGION" \
+            || gcloud artifacts repositories create "$REPOSITORY" \
+                 --repository-format=docker \
+                 --location="$REGION" \
+                 --description="DotMX images"
+
+      - name: Configure docker auth
+        run: gcloud auth configure-docker $REG_HOST --quiet
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.file }}
+          push: true
+          tags: |
+            ${{ env.REG_PATH }}/${{ matrix.name }}:${{ github.sha }}
+            ${{ env.REG_PATH }}/${{ matrix.name }}:latest
+            ${{ env.REG_PATH }}/${{ matrix.name }}:${{ github.ref_name }}

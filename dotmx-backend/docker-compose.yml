@@ -1,0 +1,253 @@
+version: "3.9"
+
+services:
+  # =============================================================================
+  # Infrastructure
+  # =============================================================================
+  
+  # Kong API Gateway (DB-less mode for production)
+  kong:
+    image: kong:3.5-alpine
+    container_name: dotmx-kong
+    ports:
+      - "80:8000"     # HTTP - Only exposed port to internet
+      - "443:8443"    # HTTPS - Only exposed port to internet
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: "off"  # Disable admin API in production
+      KONG_PLUGINS: bundled,prometheus,cors,key-auth,rate-limiting,request-transformer,response-transformer,correlation-id,request-id,ip-restriction,request-size-limiting,proxy-cache
+    volumes:
+      - ./docker/kong.yml:/etc/kong/kong.yml:ro
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dotmx-network
+    restart: unless-stopped
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: dotmx-nats
+    # Internal only - no port exposure
+    expose:
+      - "4222"
+      - "8222"
+    command: ["--jetstream", "--store_dir=/data", "-m", "8222"]
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - dotmx-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: dotmx-redis
+    # Internal only - no port exposure
+    expose:
+      - "6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - dotmx-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: dotmx-postgres
+    # Internal only - no port exposure
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: dotmx
+      POSTGRES_PASSWORD: dotmx_dev
+      POSTGRES_DB: dotmx
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dotmx"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - dotmx-network
+    restart: unless-stopped
+
+  # =============================================================================
+  # DotMX Services
+  # =============================================================================
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: dotmx-api
+    # Internal only - accessible through Kong
+    expose:
+      - "3003"
+    environment:
+      NODE_ENV: production
+      PORT: 3003
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://dotmx:dotmx_dev@postgres:5432/dotmx
+      # Trust Kong proxy headers
+      TRUST_PROXY: "true"
+    depends_on:
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kong:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dotmx-network
+    restart: unless-stopped
+
+  # Rust Matching Engine (replaces TypeScript engine)
+  engine:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.rust-engine
+    container_name: dotmx-engine
+    # Internal only - Port 3001
+    expose:
+      - "3001"
+      - "9090"  # Prometheus metrics
+    environment:
+      RUST_LOG: dotmx=info
+      ENGINE_INSTANCE_ID: engine-1
+      ENGINE_SYMBOLS: BTC-USDT,ETH-USDT,SOL-USDT
+      NATS_URLS: nats://nats:4222
+      METRICS_PORT: 9090
+    depends_on:
+      nats:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dotmx-network
+    restart: unless-stopped
+  
+  # Legacy TypeScript engine (for comparison/migration)
+  engine-ts:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.engine
+    container_name: dotmx-engine-ts
+    profiles:
+      - legacy  # Only starts with: docker compose --profile legacy up
+    expose:
+      - "3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      JOURNAL_PATH: /data/journal
+      SNAPSHOT_PATH: /data/snapshots
+    volumes:
+      - engine-data:/data
+    depends_on:
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - dotmx-network
+
+  marketdata:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.marketdata
+    container_name: dotmx-marketdata
+    # Internal only - Port 3002, accessible through Kong at /market
+    expose:
+      - "3002"
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      THROTTLE_MS: 100
+    depends_on:
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kong:
+        condition: service_healthy
+    networks:
+      - dotmx-network
+    restart: unless-stopped
+
+  management:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+      target: management
+    container_name: dotmx-management
+    # Internal only - Port 3004, accessible through Kong at /api/management
+    expose:
+      - "3004"
+    environment:
+      NODE_ENV: production
+      PORT: 3004
+      NATS_URL: nats://nats:4222
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://dotmx:dotmx_dev@postgres:5432/dotmx
+      TRUST_PROXY: "true"
+    depends_on:
+      nats:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      kong:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dotmx-network
+    restart: unless-stopped
+
+networks:
+  dotmx-network:
+    driver: bridge
+
+volumes:
+  nats-data:
+  redis-data:
+  postgres-data:
+  engine-data:

@@ -1,0 +1,976 @@
+@import "tailwindcss";
+
+/* Override Tailwind's default border color globally */
+@layer base {
+  *,
+  ::after,
+  ::before {
+    --tw-border-opacity: 1;
+    border-color: rgb(10 10 10 / var(--tw-border-opacity));
+  }
+}
+
+:root {
+  /* DotMX Design System - CSS Variables */
+  /* Backgrounds */
+  --background: #000000;
+  --background-card: #050505;
+  --background-elevated: #0a0a0a;
+  --background-hover: #0f0f0f;
+
+  /* Borders - Very dark, 1px thin */
+  --border: #0a0a0a;
+  --border-muted: #080808;
+  --border-accent: #0d0d0d;
+  --border-hover: #111111;
+
+  /* Text (high contrast) */
+  --foreground: #ffffff;
+  --foreground-muted: #9ca3af;
+  --foreground-subtle: #6b7280;
+  --foreground-disabled: #4b5563;
+
+  /* Brand - Blue accent */
+  --accent: #3a8dff;
+  --accent-hover: #5ba3ff;
+
+  /* Semantic */
+  --positive: #00d897;
+  --negative: #ff6b6b;
+  --warning: #f59e0b;
+  --info: #a855f7;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sora, "Sora", sans-serif);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+/* Smooth animations */
+* {
+  transition: all 0.2s ease;
+}
+
+/* Glow effect removed - no shadows allowed */
+.glow {
+  /* shadow removed */
+}
+
+/* Custom gradient text */
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    #3a8dff 0%,
+    #00d1ff 25%,
+    #5ba3ff 50%,
+    #1a2e57 75%,
+    #3a8dff 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Silver metallic gradient for section headers */
+.gradient-text-silver {
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #a3b8d9 25%,
+    #ffffff 50%,
+    #8ba3c7 75%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Typing animation */
+.typing-animation {
+  overflow: hidden;
+  border-right: 3px solid var(--accent);
+  white-space: nowrap;
+  animation:
+    typing 3s steps(20, end),
+    blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: var(--accent);
+  }
+}
+
+/* Rotating text animation */
+.rotating-text {
+  position: relative;
+  display: inline-block;
+  min-width: 280px;
+  text-align: left;
+}
+
+.rotating-text .word {
+  position: absolute;
+  opacity: 0;
+  animation: rotateWord 12s infinite;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rotating-text .word:nth-child(1) {
+  animation-delay: 0s;
+}
+.rotating-text .word:nth-child(2) {
+  animation-delay: 3s;
+}
+.rotating-text .word:nth-child(3) {
+  animation-delay: 6s;
+}
+.rotating-text .word:nth-child(4) {
+  animation-delay: 9s;
+}
+
+@keyframes rotateWord {
+  0%,
+  25% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  33%,
+  100% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Typewriter animation */
+.typewriter {
+  position: relative;
+  display: inline-block;
+  min-width: 280px;
+}
+
+.typewriter-text {
+  border-right: 3px solid var(--accent);
+  white-space: nowrap;
+  color: var(--accent);
+  font-weight: 600;
+  animation: blink-cursor 0.75s step-end infinite;
+}
+
+.typewriter-text::before {
+  content: "";
+  animation: typeText 16s infinite;
+}
+
+@keyframes typeText {
+  /* Type "Own your assets." */
+  0% {
+    content: "";
+  }
+  1% {
+    content: "O";
+  }
+  2% {
+    content: "Ow";
+  }
+  3% {
+    content: "Own";
+  }
+  4% {
+    content: "Own ";
+  }
+  5% {
+    content: "Own y";
+  }
+  6% {
+    content: "Own yo";
+  }
+  7% {
+    content: "Own you";
+  }
+  8% {
+    content: "Own your";
+  }
+  9% {
+    content: "Own your ";
+  }
+  10% {
+    content: "Own your a";
+  }
+  11% {
+    content: "Own your as";
+  }
+  12% {
+    content: "Own your ass";
+  }
+  13% {
+    content: "Own your asse";
+  }
+  14% {
+    content: "Own your asset";
+  }
+  15% {
+    content: "Own your assets";
+  }
+  16% {
+    content: "Own your assets.";
+  }
+
+  /* Wait longer */
+  16%,
+  23% {
+    content: "Own your assets.";
+  }
+
+  /* Delete */
+  24% {
+    content: "Own your assets";
+  }
+  24.2% {
+    content: "Own your asset";
+  }
+  24.4% {
+    content: "Own your asse";
+  }
+  24.6% {
+    content: "Own your ass";
+  }
+  24.8% {
+    content: "Own your as";
+  }
+  25% {
+    content: "";
+  }
+
+  /* Type "Control your funds." */
+  26% {
+    content: "C";
+  }
+  27% {
+    content: "Co";
+  }
+  28% {
+    content: "Con";
+  }
+  29% {
+    content: "Cont";
+  }
+  30% {
+    content: "Contr";
+  }
+  31% {
+    content: "Contro";
+  }
+  32% {
+    content: "Control";
+  }
+  33% {
+    content: "Control ";
+  }
+  34% {
+    content: "Control y";
+  }
+  35% {
+    content: "Control yo";
+  }
+  36% {
+    content: "Control you";
+  }
+  37% {
+    content: "Control your";
+  }
+  38% {
+    content: "Control your ";
+  }
+  39% {
+    content: "Control your f";
+  }
+  40% {
+    content: "Control your fu";
+  }
+  41% {
+    content: "Control your fun";
+  }
+  42% {
+    content: "Control your fund";
+  }
+  43% {
+    content: "Control your funds";
+  }
+  44% {
+    content: "Control your funds.";
+  }
+
+  /* Wait longer */
+  44%,
+  48% {
+    content: "Control your funds.";
+  }
+
+  /* Delete */
+  49% {
+    content: "Control your funds";
+  }
+  49.2% {
+    content: "Control your fund";
+  }
+  49.4% {
+    content: "Control your fun";
+  }
+  49.6% {
+    content: "Control your fu";
+  }
+  49.8% {
+    content: "Control your f";
+  }
+  50% {
+    content: "";
+  }
+
+  /* Type "Keep full custody." */
+  51% {
+    content: "K";
+  }
+  52% {
+    content: "Ke";
+  }
+  53% {
+    content: "Kee";
+  }
+  54% {
+    content: "Keep";
+  }
+  55% {
+    content: "Keep ";
+  }
+  56% {
+    content: "Keep f";
+  }
+  57% {
+    content: "Keep fu";
+  }
+  58% {
+    content: "Keep ful";
+  }
+  59% {
+    content: "Keep full";
+  }
+  60% {
+    content: "Keep full ";
+  }
+  61% {
+    content: "Keep full c";
+  }
+  62% {
+    content: "Keep full cu";
+  }
+  63% {
+    content: "Keep full cus";
+  }
+  64% {
+    content: "Keep full cust";
+  }
+  65% {
+    content: "Keep full custo";
+  }
+  66% {
+    content: "Keep full custod";
+  }
+  67% {
+    content: "Keep full custody";
+  }
+  68% {
+    content: "Keep full custody.";
+  }
+
+  /* Wait longer */
+  68%,
+  73% {
+    content: "Keep full custody.";
+  }
+
+  /* Delete */
+  74% {
+    content: "Keep full custody";
+  }
+  74.2% {
+    content: "Keep full custod";
+  }
+  74.4% {
+    content: "Keep full custo";
+  }
+  74.6% {
+    content: "Keep full cust";
+  }
+  74.8% {
+    content: "Keep full cus";
+  }
+  75% {
+    content: "";
+  }
+
+  /* Type "Stay decentralized." */
+  76% {
+    content: "S";
+  }
+  77% {
+    content: "St";
+  }
+  78% {
+    content: "Sta";
+  }
+  79% {
+    content: "Stay";
+  }
+  80% {
+    content: "Stay ";
+  }
+  81% {
+    content: "Stay d";
+  }
+  82% {
+    content: "Stay de";
+  }
+  83% {
+    content: "Stay dec";
+  }
+  84% {
+    content: "Stay dece";
+  }
+  85% {
+    content: "Stay decen";
+  }
+  86% {
+    content: "Stay decent";
+  }
+  87% {
+    content: "Stay decentr";
+  }
+  88% {
+    content: "Stay decentra";
+  }
+  89% {
+    content: "Stay decentral";
+  }
+  90% {
+    content: "Stay decentrali";
+  }
+  91% {
+    content: "Stay decentraliz";
+  }
+  92% {
+    content: "Stay decentralize";
+  }
+  93% {
+    content: "Stay decentralized";
+  }
+  94% {
+    content: "Stay decentralized.";
+  }
+
+  /* Wait longer */
+  94%,
+  98% {
+    content: "Stay decentralized.";
+  }
+
+  /* Delete */
+  99% {
+    content: "Stay decentralized";
+  }
+  99.2% {
+    content: "Stay decentralize";
+  }
+  99.4% {
+    content: "Stay decentraliz";
+  }
+  99.6% {
+    content: "Stay decentrali";
+  }
+  99.8% {
+    content: "Stay decentral";
+  }
+  100% {
+    content: "";
+  }
+}
+
+@keyframes blink-cursor {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: var(--accent);
+  }
+}
+
+/* Orbital animation */
+.orbital-container {
+  position: relative;
+}
+
+.orbital-ring {
+  position: absolute;
+  border: 1px solid rgba(58, 141, 255, 0.3);
+  border-radius: 50%;
+  animation: rotate 8s linear infinite;
+}
+
+.orbital-ring-1 {
+  width: 120%;
+  height: 120%;
+  top: -10%;
+  left: -10%;
+  animation-duration: 6s;
+}
+
+.orbital-ring-2 {
+  width: 140%;
+  height: 140%;
+  top: -20%;
+  left: -20%;
+  animation-duration: 10s;
+  animation-direction: reverse;
+}
+
+.orbital-ring-3 {
+  width: 160%;
+  height: 160%;
+  top: -30%;
+  left: -30%;
+  animation-duration: 14s;
+}
+
+.electron {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #3a8dff, #1a2e57);
+  border-radius: 50%;
+}
+
+.electron-1 {
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.electron-2 {
+  top: 50%;
+  right: -4px;
+  transform: translateY(-50%);
+}
+
+.electron-3 {
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Trading interface specific styles */
+.trading-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 8px;
+  height: calc(100vh - 120px);
+}
+
+.order-book-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.buy-orders {
+  background: linear-gradient(
+    to right,
+    rgba(34, 197, 94, 0.1) 0%,
+    transparent 100%
+  );
+}
+
+.sell-orders {
+  background: linear-gradient(
+    to right,
+    rgba(239, 68, 68, 0.1) 0%,
+    transparent 100%
+  );
+}
+
+.price-ticker {
+  animation: priceFlash 0.5s ease-in-out;
+}
+
+@keyframes priceFlash {
+  0% {
+    background-color: rgba(58, 141, 255, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+/* Custom input styles for trading forms */
+.trading-input {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--foreground);
+  font-size: 14px;
+  font-family: "JetBrains Mono", monospace;
+  transition: all 0.2s ease;
+}
+
+.trading-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--accent-hover);
+}
+
+.trading-input::placeholder {
+  color: var(--muted);
+}
+
+/* Custom scrollbar for trading interface */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--background);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--background);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+/* Trading card animations */
+.trading-card {
+  backdrop-filter: blur(20px);
+  background: rgba(18, 35, 71, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.trading-card:hover {
+  background: rgba(18, 35, 71, 0.95);
+  border-color: rgba(58, 141, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Professional gradient backgrounds */
+.trading-bg {
+  background:
+    radial-gradient(
+      ellipse at top,
+      rgba(58, 141, 255, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at bottom,
+      rgba(10, 23, 51, 0.8) 0%,
+      transparent 50%
+    ),
+    linear-gradient(180deg, #0a1733 0%, #122347 50%, #0a1733 100%);
+}
+
+/* Enhanced button states */
+.trading-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.trading-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.trading-button:hover::before {
+  left: 100%;
+}
+
+/* Floating animation for portfolio bubbles */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(5px) rotate(-1deg);
+  }
+}
+
+/* Hero section floating animations */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+}
+
+@keyframes float-delayed {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulse-delayed {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Apply animations */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 7s ease-in-out infinite 2s;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-pulse-delayed {
+  animation: pulse-delayed 5s ease-in-out infinite 1s;
+}
+
+/* Custom date input styling */
+input[type="date"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Custom date input focus and hover states */
+input[type="date"]:focus::-webkit-calendar-picker-indicator {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(200deg);
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  color: var(--foreground);
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  color: var(--foreground);
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: var(--muted);
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: var(--foreground);
+  background: transparent;
+}
+
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-clear-button {
+  display: none;
+}
+
+/* Market status indicators */
+.status-indicator {
+  position: relative;
+  display: inline-block;
+}
+
+.status-indicator::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -12px;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.online::before {
+  background: #10b981;
+}
+
+.status-indicator.offline::before {
+  background: #ef4444;
+}
+
+/* Enhanced typography for trading data */
+.mono-font {
+  font-family: "JetBrains Mono", "Fira Code", "Monaco", "Consolas", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glass morphism effects */
+.glass-card {
+  background: rgba(18, 35, 71, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card-hover:hover {
+  background: rgba(18, 35, 71, 0.6);
+  border-color: rgba(58, 141, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Custom Range Slider */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(
+    to right,
+    #f97316 0%,
+    #f97316 50%,
+    #374151 50%,
+    #374151 100%
+  );
+  outline: none;
+  border-radius: 8px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f97316;
+  cursor: pointer;
+  border: 2px solid white;
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f97316;
+  cursor: pointer;
+  border: 2px solid white;
+}

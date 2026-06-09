@@ -1,0 +1,201 @@
+# Kong Development Configuration
+# ============================================================================
+# Minimal setup for local development with relaxed policies
+# - No strict rate limiting
+# - No authentication required (for easy testing)
+# - All endpoints accessible
+# ============================================================================
+
+_format_version: "3.0"
+_transform: true
+
+services:
+  # Market Data Service (Port 3002) - klines/ticker REST endpoints
+  # MUST come first for route precedence over general /api routes
+  - name: marketdata-api-dev
+    url: http://host.docker.internal:3002
+    protocol: http
+    routes:
+      - name: marketdata-klines-ticker-dev
+        paths:
+          - /api/v1/klines
+          - /api/v1/ticker
+        methods:
+          - GET
+          - OPTIONS
+        strip_path: false
+        plugins:
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - OPTIONS
+              headers:
+                - "*"
+              credentials: true
+              max_age: 3600
+
+  # Market Data WebSocket (Port 3002)
+  - name: marketdata-ws-dev
+    url: http://host.docker.internal:3002
+    protocol: http
+    routes:
+      - name: ws-dev
+        paths:
+          - /ws
+          - /stream
+        protocols:
+          - http
+          - https
+        strip_path: false
+        plugins:
+          - name: cors
+            config:
+              origins:
+                - "*"
+
+  # DotMX API Service (Port 3003) - User-facing REST API
+  - name: dotmx-api-dev
+    url: http://host.docker.internal:3003
+    protocol: http
+    retries: 3
+    connect_timeout: 10000
+    write_timeout: 60000
+    read_timeout: 60000
+    
+    routes:
+      # Health Check
+      - name: api-health-dev
+        paths:
+          - /api/health
+          - /health
+        methods:
+          - GET
+        strip_path: false
+        plugins:
+          - name: cors
+            config:
+              origins:
+                - "*"
+
+      # All other API routes
+      - name: api-all-dev
+        paths:
+          - /api
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+          - OPTIONS
+        strip_path: false
+        preserve_host: false
+        plugins:
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - PATCH
+                - OPTIONS
+              headers:
+                - "*"
+              exposed_headers:
+                - "*"
+              credentials: true
+              max_age: 3600
+          - name: rate-limiting
+            config:
+              minute: 10000    # Very high for dev
+              policy: local
+          - name: request-transformer
+            config:
+              add:
+                headers:
+                  - X-Gateway:kong-dev
+                  - X-Environment:development
+
+  # Metrics endpoint (Dev)
+  - name: engine-metrics-dev
+    url: http://host.docker.internal:9090
+    protocol: http
+    routes:
+      - name: metrics-dev
+        paths:
+          - /metrics
+        methods:
+          - GET
+        strip_path: false
+
+  # Management API Service (Alfred Admin Panel)
+  - name: management-api-dev
+    url: http://host.docker.internal:3004
+    protocol: http
+    retries: 3
+    connect_timeout: 10000
+    write_timeout: 60000
+    read_timeout: 60000
+    
+    routes:
+      - name: management-api-all-dev
+        paths:
+          - /admin
+        methods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - PATCH
+          - OPTIONS
+        strip_path: true
+        preserve_host: false
+        plugins:
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - PATCH
+                - OPTIONS
+              headers:
+                - "*"
+              exposed_headers:
+                - "*"
+              credentials: true
+              max_age: 3600
+          - name: request-transformer
+            config:
+              add:
+                headers:
+                  - X-Gateway:kong-dev
+                  - X-Environment:development
+
+# Global plugins (Dev)
+plugins:
+  - name: prometheus
+    config:
+      per_consumer: false
+  
+  - name: correlation-id
+    config:
+      header_name: X-Correlation-ID
+      generator: uuid
+      echo_downstream: true
+
+  # Response headers for debugging
+  - name: response-transformer
+    config:
+      add:
+        headers:
+          - X-Kong-Dev:true

@@ -1,0 +1,99 @@
+/* TradingView Light Theme Custom Styles */
+
+.tradingview-widget-container {
+  background: #ffffff !important;
+}
+
+.chart-container {
+  background: #ffffff !important;
+}
+
+/* Override default TradingView styles for light theme */
+.tv-lightweight-charts {
+  background: #ffffff !important;
+}
+
+/* Scrollbar styling for TradingView */
+.tv-lightweight-charts ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tv-lightweight-charts ::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+.tv-lightweight-charts ::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+.tv-lightweight-charts ::-webkit-scrollbar-thumb:hover {
+  background: #999999;
+}
+
+/* TradingView widget loading state */
+.tv-loading {
+  background: #ffffff !important;
+  color: #666666 !important;
+}
+
+/* Override default text colors */
+.tv-chart-container {
+  color: #131722 !important;
+}
+
+/* Volume indicator colors */
+.tv-volume-indicator {
+  --tv-color-volume-up: #16a34a;
+  --tv-color-volume-down: #dc2626;
+}
+
+/* Price scale colors */
+.tv-price-scale {
+  background: #ffffff !important;
+  color: #131722 !important;
+}
+
+/* Time scale colors */
+.tv-time-scale {
+  background: #ffffff !important;
+  color: #131722 !important;
+}
+
+/* Crosshair */
+.tv-crosshair {
+  color: #666666 !important;
+}
+
+/* Grid lines */
+.tv-grid-line {
+  color: #e1e5ea !important;
+}
+
+/* Series styles */
+.tv-series-candle {
+  --tv-color-candle-up: #16a34a;
+  --tv-color-candle-down: #dc2626;
+  --tv-color-candle-border-up: #16a34a;
+  --tv-color-candle-border-down: #dc2626;
+  --tv-color-candle-wick-up: #16a34a;
+  --tv-color-candle-wick-down: #dc2626;
+}
+
+/* Button and control styling */
+.tv-button {
+  background: #f8f9fa !important;
+  border: 1px solid #e1e5ea !important;
+  color: #666666 !important;
+}
+
+.tv-button:hover {
+  background: #e1e5ea !important;
+  color: #333333 !important;
+}
+
+.tv-button--active {
+  background: #4f90ff !important;
+  color: white !important;
+}

@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Data
+data/
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Test
+coverage/
+.nyc_output/
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+.cargo/
+*.profraw
+*.profdata
+/dist
+
+
+dotmx-*.json
+secrets/

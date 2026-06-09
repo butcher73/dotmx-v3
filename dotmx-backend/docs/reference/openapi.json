@@ -1,0 +1,1867 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DotMX Exchange API",
+    "version": "1.0.0",
+    "description": "High-performance perpetual futures exchange with Binance-style fee structure.\n\n## Features\n\n- **Maker Rebates**: Earn -0.005% to -0.025% rebates as a maker\n- **Taker Fees**: Pay 0.015% to 0.035% as a taker\n- **Funding Fees**: 8-hour interval, peer-to-peer funding mechanism\n- **Liquidation**: 0.4% penalty with progressive liquidation\n- **10 VIP Tiers**: Volume-based fee discounts up to 50%\n- **DMX Token**: 25% discount on taker fees\n\n## Rate Limits\n\n- Public endpoints: 1200 requests/minute\n- Authenticated endpoints: 2400 requests/minute\n- Order placement: 100 orders/second\n\n## WebSocket Feeds\n\n- Market data: `ws://api.dotmx.xyz/ws/market`\n- User updates: `ws://api.dotmx.xyz/ws/user`\n\n## Authentication\n\nUse Bearer token in Authorization header:\n```\nAuthorization: Bearer <access_token>\n```",
+    "contact": {
+      "name": "DotMX Team",
+      "url": "https://dotmx.xyz",
+      "email": "api@dotmx.xyz"
+    },
+    "license": {
+      "name": "Proprietary"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3003",
+      "description": "Development server"
+    },
+    {
+      "url": "https://api.dotmx.xyz",
+      "description": "Production server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "health",
+      "description": "Health check and monitoring endpoints"
+    },
+    {
+      "name": "orders",
+      "description": "Order management - place, cancel, and query orders"
+    },
+    {
+      "name": "market",
+      "description": "Market data - order books, tickers, and symbols"
+    },
+    {
+      "name": "auth",
+      "description": "Authentication and user management"
+    },
+    {
+      "name": "fees",
+      "description": "Fee tier and calculation endpoints"
+    },
+    {
+      "name": "wallet",
+      "description": "Custodial wallet - deposit addresses, balances, and withdrawals"
+    },
+    {
+      "name": "admin-wallet",
+      "description": "Admin wallet management - sweeper, batches, and warm wallets"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Get API information",
+        "description": "Returns basic information about the DotMX API",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "example": "DotMX Exchange API"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0.0"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Health check",
+        "description": "Basic health check endpoint",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "timestamp": {
+                      "type": "integer",
+                      "example": 1737390000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Readiness check",
+        "description": "Check if all services are ready to accept traffic",
+        "responses": {
+          "200": {
+            "description": "Service is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ready": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "services": {
+                      "type": "object",
+                      "properties": {
+                        "engine": {
+                          "type": "boolean"
+                        },
+                        "database": {
+                          "type": "boolean"
+                        },
+                        "redis": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/live": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Liveness check",
+        "description": "Check if the service is alive",
+        "responses": {
+          "200": {
+            "description": "Service is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "live": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "tags": ["orders"],
+        "summary": "Place a new order",
+        "description": "Submit a new buy or sell order to the matching engine.\n\n## Order Types\n\n- **LIMIT**: Order with a specific price\n- **MARKET**: Order executed at best available price\n\n## Time in Force\n\n- **GTC**: Good Till Cancel (default)\n- **IOC**: Immediate or Cancel\n- **FOK**: Fill or Kill",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order placed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "orderId": {
+                          "type": "string",
+                          "example": "ORD-123456"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "error": {
+                          "type": "string",
+                          "example": "Insufficient balance"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "429": {
+            "$ref": "#/components/responses/RateLimited"
+          }
+        }
+      }
+    },
+    "/orders/{orderId}": {
+      "get": {
+        "tags": ["orders"],
+        "summary": "Get order status",
+        "description": "Retrieve the current status of an order",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "description": "Order ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderStatus"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Order not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Order not found"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["orders"],
+        "summary": "Cancel an order",
+        "description": "Cancel an existing open order",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "description": "Order ID to cancel",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "symbol",
+            "in": "query",
+            "required": true,
+            "description": "Trading pair symbol",
+            "schema": {
+              "type": "string",
+              "example": "BTC-USD"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "description": "User ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cancellation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "error": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/orderbook/{symbol}": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get order book",
+        "description": "Retrieve the current order book (bids and asks) for a symbol",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "description": "Trading pair symbol",
+            "schema": {
+              "type": "string",
+              "example": "BTC-USD"
+            }
+          },
+          {
+            "name": "depth",
+            "in": "query",
+            "required": false,
+            "description": "Order book depth (default: 20, max: 5000)",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "minimum": 1,
+              "maximum": 5000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order book data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderBook"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/symbols": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get all symbols",
+        "description": "List all available trading pairs",
+        "responses": {
+          "200": {
+            "description": "List of trading symbols",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "symbols": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Symbol"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/ticker/{symbol}": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get ticker for symbol",
+        "description": "Get 24-hour price statistics for a specific symbol",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "description": "Trading pair symbol",
+            "schema": {
+              "type": "string",
+              "example": "BTC-USD"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "24-hour ticker data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ticker"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/market/tickers": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get all tickers",
+        "description": "Get 24-hour price statistics for all symbols",
+        "responses": {
+          "200": {
+            "description": "List of all tickers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tickers": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Ticker"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wallet/chains": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Get supported chains",
+        "description": "Returns list of supported blockchain networks for deposits and withdrawals",
+        "responses": {
+          "200": {
+            "description": "List of supported chains",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "chains": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ChainInfo"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wallet/deposit-address": {
+      "post": {
+        "tags": ["wallet"],
+        "summary": "Get or create deposit address",
+        "description": "Returns a unique deposit address for the authenticated user on the specified chain. Creates a new address if one doesn't exist.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["chain_code"],
+                "properties": {
+                  "chain_code": {
+                    "type": "string",
+                    "description": "Chain code (ETH, MATIC, BSC, ARB, OP)",
+                    "example": "ETH"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Deposit address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DepositAddress"
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wallet/deposit-addresses": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "List deposit addresses",
+        "description": "Returns all deposit addresses for the authenticated user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of deposit addresses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "addresses": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DepositAddress"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wallet/balances": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Get balances",
+        "description": "Returns token balances for the authenticated user",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User balances",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "balances": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserBalance"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wallet/deposits": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Get deposit history",
+        "description": "Returns deposit history for the authenticated user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results (max 100)",
+            "schema": { "type": "integer", "default": 50, "maximum": 100 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deposit history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "deposits": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Deposit"
+                      }
+                    },
+                    "pagination": {
+                      "$ref": "#/components/schemas/Pagination"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wallet/withdraw": {
+      "post": {
+        "tags": ["wallet"],
+        "summary": "Request withdrawal",
+        "description": "Create a new withdrawal request. Funds will be locked until processed via the multisig warm wallet.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Withdrawal created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Withdrawal"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" },
+                    "code": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wallet/withdrawals": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "Get withdrawal history",
+        "description": "Returns withdrawal history for the authenticated user",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filter by status",
+            "schema": { "type": "string", "enum": ["pending", "pending_signature", "broadcasting", "completed", "failed", "cancelled"] }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Withdrawal history",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "withdrawals": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Withdrawal"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wallet/withdrawals/{id}": {
+      "delete": {
+        "tags": ["wallet"],
+        "summary": "Cancel withdrawal",
+        "description": "Cancel a pending withdrawal request. Only works for withdrawals in 'pending' status.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Withdrawal ID",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Withdrawal cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Withdrawal cancelled successfully" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cannot cancel withdrawal",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/wallet/validate-address": {
+      "post": {
+        "tags": ["wallet"],
+        "summary": "Validate address",
+        "description": "Validate an EVM wallet address format and return checksum version",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["address"],
+                "properties": {
+                  "address": { "type": "string", "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f00aB1" },
+                  "chain_code": { "type": "string", "example": "ETH" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": { "type": "boolean" },
+                    "checksum_address": { "type": "string" },
+                    "chain_code": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/wallet/tokens": {
+      "get": {
+        "tags": ["wallet"],
+        "summary": "List supported tokens",
+        "description": "Returns list of supported tokens for deposits and withdrawals",
+        "responses": {
+          "200": {
+            "description": "List of supported tokens",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tokens": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/SupportedToken"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/wallet/status": {
+      "get": {
+        "tags": ["admin-wallet"],
+        "summary": "Get wallet system status",
+        "description": "Returns health status of all wallet services (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "System status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletSystemStatus"
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/withdrawals/pending": {
+      "get": {
+        "tags": ["admin-wallet"],
+        "summary": "List pending withdrawals",
+        "description": "Get all pending withdrawal requests (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "chain_code",
+            "in": "query",
+            "description": "Filter by chain",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending withdrawals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "withdrawals": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Withdrawal"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/withdrawals/batch": {
+      "post": {
+        "tags": ["admin-wallet"],
+        "summary": "Create withdrawal batch",
+        "description": "Group pending withdrawals into a batch for multisig processing (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["chain_code"],
+                "properties": {
+                  "chain_code": { "type": "string", "example": "ETH" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Batch created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "batch": {
+                      "$ref": "#/components/schemas/WithdrawalBatch"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/withdrawals/batches": {
+      "get": {
+        "tags": ["admin-wallet"],
+        "summary": "List pending batches",
+        "description": "Get all pending withdrawal batches awaiting signature (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Pending batches",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "batches": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WithdrawalBatch"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/withdrawals/batch/{id}/export": {
+      "get": {
+        "tags": ["admin-wallet"],
+        "summary": "Export batch for signing",
+        "description": "Export unsigned transaction data for offline multisig signing (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Batch ID",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Export data for offline signing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchExport"
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/withdrawals/batch/{id}/submit": {
+      "post": {
+        "tags": ["admin-wallet"],
+        "summary": "Submit signed transaction",
+        "description": "Submit a signed multisig transaction for broadcast (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Batch ID",
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["signed_tx"],
+                "properties": {
+                  "signed_tx": { "type": "string", "description": "Signed transaction hex" },
+                  "signatures": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction broadcasted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tx_hash": { "type": "string" },
+                    "status": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/sweeper/status": {
+      "get": {
+        "tags": ["admin-wallet"],
+        "summary": "Get sweeper status",
+        "description": "Get current status of the deposit sweeper service (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Sweeper status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SweeperStatus"
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/sweeper/start": {
+      "post": {
+        "tags": ["admin-wallet"],
+        "summary": "Start sweeper service",
+        "description": "Start the automatic deposit sweeper (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Sweeper started",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "timestamp": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/sweeper/stop": {
+      "post": {
+        "tags": ["admin-wallet"],
+        "summary": "Stop sweeper service",
+        "description": "Stop the automatic deposit sweeper (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Sweeper stopped",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" },
+                    "timestamp": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/sweeper/sweep": {
+      "post": {
+        "tags": ["admin-wallet"],
+        "summary": "Trigger manual sweep",
+        "description": "Manually trigger a sweep cycle (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "chain_code": { "type": "string", "description": "Optional chain to sweep" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sweep result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "swept_count": { "type": "integer" },
+                    "total_amount": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/warm-wallets": {
+      "get": {
+        "tags": ["admin-wallet"],
+        "summary": "List warm wallets",
+        "description": "Get configured warm wallets for all chains (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of warm wallets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "wallets": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/WarmWallet"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      },
+      "post": {
+        "tags": ["admin-wallet"],
+        "summary": "Configure warm wallet",
+        "description": "Add or update a warm wallet configuration (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WarmWalletConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Warm wallet configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "wallet": {
+                      "$ref": "#/components/schemas/WarmWallet"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/tokens": {
+      "post": {
+        "tags": ["admin-wallet"],
+        "summary": "Add supported token",
+        "description": "Add or update a supported token configuration (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportedTokenConfig"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Token configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "$ref": "#/components/schemas/SupportedToken"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/reconciliation": {
+      "get": {
+        "tags": ["admin-wallet"],
+        "summary": "Balance reconciliation",
+        "description": "Get internal balance summary for reconciliation with on-chain data (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Reconciliation data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconciliationReport"
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    },
+    "/admin/wallet/audit-logs": {
+      "get": {
+        "tags": ["admin-wallet"],
+        "summary": "Get audit logs",
+        "description": "Get balance audit logs for tracking all balance changes (admin only)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "user_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "operation", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 100 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit logs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "logs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AuditLog"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": { "description": "Admin access required" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT access token obtained from /auth/login or /auth/register"
+      },
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-KEY",
+        "description": "API key for programmatic access"
+      }
+    },
+    "schemas": {
+      "PlaceOrderRequest": {
+        "type": "object",
+        "required": ["userId", "symbol", "side", "type", "quantity"],
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "User ID",
+            "example": "user_123"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "Trading pair symbol",
+            "example": "BTC-USD"
+          },
+          "side": {
+            "type": "string",
+            "enum": ["BUY", "SELL"],
+            "description": "Order side"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["LIMIT", "MARKET"],
+            "description": "Order type"
+          },
+          "price": {
+            "type": "number",
+            "description": "Limit price (required for LIMIT orders)",
+            "example": 50000.00
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Order quantity",
+            "example": 1.5
+          },
+          "timeInForce": {
+            "type": "string",
+            "enum": ["GTC", "IOC", "FOK"],
+            "description": "Time in force",
+            "default": "GTC"
+          }
+        }
+      },
+      "OrderStatus": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "example": "ORD-123456"
+          },
+          "userId": {
+            "type": "string",
+            "example": "user_123"
+          },
+          "symbol": {
+            "type": "string",
+            "example": "BTC-USD"
+          },
+          "side": {
+            "type": "string",
+            "enum": ["BUY", "SELL"]
+          },
+          "type": {
+            "type": "string",
+            "enum": ["LIMIT", "MARKET"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["NEW", "PARTIALLY_FILLED", "FILLED", "CANCELED", "REJECTED"],
+            "example": "NEW"
+          },
+          "price": {
+            "type": "number",
+            "example": 50000.00
+          },
+          "quantity": {
+            "type": "number",
+            "example": 1.5
+          },
+          "filledQuantity": {
+            "type": "number",
+            "example": 0.5
+          },
+          "avgPrice": {
+            "type": "number",
+            "example": 50050.00
+          },
+          "timestamp": {
+            "type": "integer",
+            "example": 1737390000000
+          }
+        }
+      },
+      "OrderBook": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "example": "BTC-USD"
+          },
+          "bids": {
+            "type": "array",
+            "description": "Buy orders (price, quantity)",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "example": [50000.00, 1.5]
+            }
+          },
+          "asks": {
+            "type": "array",
+            "description": "Sell orders (price, quantity)",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "example": [50100.00, 2.0]
+            }
+          },
+          "timestamp": {
+            "type": "integer",
+            "example": 1737390000000
+          }
+        }
+      },
+      "Symbol": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "example": "BTC-USD"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["TRADING", "HALT", "MAINTENANCE"],
+            "example": "TRADING"
+          },
+          "baseAsset": {
+            "type": "string",
+            "example": "BTC"
+          },
+          "quoteAsset": {
+            "type": "string",
+            "example": "USD"
+          },
+          "pricePrecision": {
+            "type": "integer",
+            "example": 2
+          },
+          "quantityPrecision": {
+            "type": "integer",
+            "example": 8
+          },
+          "minQuantity": {
+            "type": "number",
+            "example": 0.001
+          },
+          "maxQuantity": {
+            "type": "number",
+            "example": 1000
+          },
+          "minNotional": {
+            "type": "number",
+            "example": 10
+          }
+        }
+      },
+      "Ticker": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "example": "BTC-USD"
+          },
+          "lastPrice": {
+            "type": "number",
+            "example": 50000.00
+          },
+          "priceChange24h": {
+            "type": "number",
+            "example": 1500.00
+          },
+          "priceChangePercent24h": {
+            "type": "number",
+            "example": 3.09
+          },
+          "volume24h": {
+            "type": "number",
+            "example": 15000000.00
+          },
+          "high24h": {
+            "type": "number",
+            "example": 51000.00
+          },
+          "low24h": {
+            "type": "number",
+            "example": 48000.00
+          },
+          "timestamp": {
+            "type": "integer",
+            "example": 1737390000000
+          }
+        }
+      },
+      "ChainInfo": {
+        "type": "object",
+        "properties": {
+          "chain_code": { "type": "string", "example": "ETH" },
+          "chain_id": { "type": "integer", "example": 1 },
+          "name": { "type": "string", "example": "Ethereum" },
+          "native_symbol": { "type": "string", "example": "ETH" },
+          "explorer_url": { "type": "string", "example": "https://etherscan.io" },
+          "confirmations_required": { "type": "integer", "example": 12 }
+        }
+      },
+      "DepositAddress": {
+        "type": "object",
+        "properties": {
+          "address": { "type": "string", "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f00aB1" },
+          "chain_code": { "type": "string", "example": "ETH" },
+          "chain_id": { "type": "integer", "example": 1 },
+          "chain_name": { "type": "string", "example": "Ethereum" },
+          "explorer_url": { "type": "string", "example": "https://etherscan.io" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserBalance": {
+        "type": "object",
+        "properties": {
+          "token_symbol": { "type": "string", "example": "ETH" },
+          "chain_code": { "type": "string", "example": "ETH" },
+          "available": { "type": "string", "example": "1.500000000000000000" },
+          "locked": { "type": "string", "example": "0.100000000000000000" },
+          "total": { "type": "string", "example": "1.600000000000000000" }
+        }
+      },
+      "Deposit": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "chain_code": { "type": "string", "example": "ETH" },
+          "token_symbol": { "type": "string", "example": "ETH" },
+          "amount": { "type": "string", "example": "1.000000000000000000" },
+          "tx_hash": { "type": "string", "example": "0xabc123..." },
+          "status": { "type": "string", "enum": ["pending", "confirming", "confirmed", "credited", "swept", "failed"] },
+          "confirmations": { "type": "integer", "example": 12 },
+          "detected_at": { "type": "string", "format": "date-time" },
+          "confirmed_at": { "type": "string", "format": "date-time" },
+          "swept_at": { "type": "string", "format": "date-time" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "WithdrawalRequest": {
+        "type": "object",
+        "required": ["chain_code", "token_symbol", "amount", "destination_address"],
+        "properties": {
+          "chain_code": { "type": "string", "example": "ETH", "description": "Chain code" },
+          "token_symbol": { "type": "string", "example": "ETH", "description": "Token symbol" },
+          "amount": { "type": "string", "example": "1.0", "description": "Amount to withdraw" },
+          "destination_address": { "type": "string", "example": "0x742d35Cc6634C0532925a3b844Bc9e7595f00aB1" }
+        }
+      },
+      "Withdrawal": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "status": { "type": "string", "enum": ["pending", "pending_signature", "broadcasting", "completed", "failed", "cancelled"] },
+          "amount": { "type": "string", "example": "1.000000000000000000" },
+          "fee": { "type": "string", "example": "0.001000000000000000" },
+          "destination_address": { "type": "string" },
+          "token_symbol": { "type": "string", "example": "ETH" },
+          "chain_code": { "type": "string", "example": "ETH" },
+          "tx_hash": { "type": "string", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "completed_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "limit": { "type": "integer" },
+          "offset": { "type": "integer" },
+          "total": { "type": "integer" }
+        }
+      },
+      "SupportedToken": {
+        "type": "object",
+        "properties": {
+          "chain_code": { "type": "string", "example": "ETH" },
+          "token_address": { "type": "string", "nullable": true },
+          "token_symbol": { "type": "string", "example": "USDT" },
+          "token_name": { "type": "string", "example": "Tether USD" },
+          "decimals": { "type": "integer", "example": 6 },
+          "is_native": { "type": "boolean", "example": false },
+          "min_deposit": { "type": "string", "example": "10" },
+          "min_withdrawal": { "type": "string", "example": "10" },
+          "withdrawal_fee": { "type": "string", "example": "5" }
+        }
+      },
+      "SupportedTokenConfig": {
+        "type": "object",
+        "required": ["chain_code", "chain_id", "token_symbol", "token_name", "decimals"],
+        "properties": {
+          "chain_code": { "type": "string" },
+          "chain_id": { "type": "integer" },
+          "token_address": { "type": "string", "description": "Contract address (null for native)" },
+          "token_symbol": { "type": "string" },
+          "token_name": { "type": "string" },
+          "decimals": { "type": "integer" },
+          "is_native": { "type": "boolean", "default": false },
+          "min_deposit": { "type": "string", "default": "0" },
+          "min_withdrawal": { "type": "string", "default": "0" },
+          "withdrawal_fee": { "type": "string", "default": "0" }
+        }
+      },
+      "WalletSystemStatus": {
+        "type": "object",
+        "properties": {
+          "wallet": {
+            "type": "object",
+            "properties": {
+              "healthy": { "type": "boolean" },
+              "message": { "type": "string" }
+            }
+          },
+          "sweeper": {
+            "type": "object",
+            "properties": {
+              "is_running": { "type": "boolean" },
+              "last_sweep": { "type": "string", "format": "date-time" }
+            }
+          },
+          "withdrawals": {
+            "type": "object",
+            "properties": {
+              "pending_count": { "type": "integer" },
+              "pending_batches": { "type": "integer" }
+            }
+          },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "WithdrawalBatch": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "chain_code": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "signed", "broadcasted", "completed", "failed"] },
+          "withdrawal_count": { "type": "integer" },
+          "total_amount": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "BatchExport": {
+        "type": "object",
+        "properties": {
+          "batch_id": { "type": "string", "format": "uuid" },
+          "chain_code": { "type": "string" },
+          "chain_id": { "type": "integer" },
+          "warm_wallet_address": { "type": "string" },
+          "unsigned_tx": { "type": "string" },
+          "withdrawals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "destination": { "type": "string" },
+                "amount": { "type": "string" },
+                "token_symbol": { "type": "string" }
+              }
+            }
+          },
+          "total_amount": { "type": "string" },
+          "estimated_gas": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "SweeperStatus": {
+        "type": "object",
+        "properties": {
+          "is_running": { "type": "boolean" },
+          "last_sweep": { "type": "string", "format": "date-time", "nullable": true },
+          "next_sweep": { "type": "string", "format": "date-time", "nullable": true },
+          "pending_deposits": { "type": "integer" },
+          "chains": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "pending": { "type": "integer" },
+                "last_block": { "type": "integer" }
+              }
+            }
+          }
+        }
+      },
+      "WarmWallet": {
+        "type": "object",
+        "properties": {
+          "chain_code": { "type": "string" },
+          "chain_id": { "type": "integer" },
+          "address": { "type": "string" },
+          "wallet_type": { "type": "string", "enum": ["gnosis_safe", "custom_multisig", "eoa"] },
+          "required_signatures": { "type": "integer" },
+          "total_signers": { "type": "integer" },
+          "is_active": { "type": "boolean" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "WarmWalletConfig": {
+        "type": "object",
+        "required": ["chain_code", "chain_id", "address", "wallet_type", "required_signatures", "total_signers"],
+        "properties": {
+          "chain_code": { "type": "string", "example": "ETH" },
+          "chain_id": { "type": "integer", "example": 1 },
+          "address": { "type": "string", "description": "Multisig wallet address" },
+          "wallet_type": { "type": "string", "enum": ["gnosis_safe", "custom_multisig", "eoa"] },
+          "required_signatures": { "type": "integer", "example": 2 },
+          "total_signers": { "type": "integer", "example": 3 }
+        }
+      },
+      "ReconciliationReport": {
+        "type": "object",
+        "properties": {
+          "internal_balances": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "token_symbol": { "type": "string" },
+                "chain_code": { "type": "string" },
+                "total_available": { "type": "string" },
+                "total_locked": { "type": "string" }
+              }
+            }
+          },
+          "warm_wallets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "chain_code": { "type": "string" },
+                "address": { "type": "string" }
+              }
+            }
+          },
+          "pending": {
+            "type": "object",
+            "properties": {
+              "deposits": {
+                "type": "object",
+                "properties": {
+                  "count": { "type": "integer" },
+                  "total": { "type": "string" }
+                }
+              },
+              "withdrawals": {
+                "type": "object",
+                "properties": {
+                  "count": { "type": "integer" },
+                  "total": { "type": "string" }
+                }
+              }
+            }
+          },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "note": { "type": "string" }
+        }
+      },
+      "AuditLog": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "user_id": { "type": "string", "format": "uuid" },
+          "operation": { "type": "string", "enum": ["deposit", "withdrawal_lock", "withdrawal_complete", "withdrawal_cancel", "trade", "fee"] },
+          "token_symbol": { "type": "string" },
+          "chain_code": { "type": "string" },
+          "amount": { "type": "string" },
+          "balance_before": { "type": "string" },
+          "balance_after": { "type": "string" },
+          "reference_id": { "type": "string" },
+          "reference_type": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Authentication required",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Unauthorized - Missing or invalid authentication token"
+                }
+              }
+            }
+          }
+        }
+      },
+      "RateLimited": {
+        "description": "Rate limit exceeded",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string",
+                  "example": "Rate limit exceeded. Please try again later."
+                },
+                "retryAfter": {
+                  "type": "integer",
+                  "description": "Seconds until rate limit resets",
+                  "example": 60
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

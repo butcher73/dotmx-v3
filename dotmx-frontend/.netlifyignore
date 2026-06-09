@@ -1,0 +1,50 @@
+# Netlify build artifacts that may contain environment variables
+
+.next/
+.netlify/
+.vercel/
+
+# Webpack cache directories (contain bundled environment variables)
+
+.next/cache/
+.next/cache/webpack/
+.next/cache/webpack/client-production/
+.next/cache/webpack/server-production/
+.netlify/.next/cache/
+.netlify/.next/cache/webpack/
+.netlify/.next/cache/webpack/client-production/
+.netlify/.next/cache/webpack/server-production/
+
+# Node modules and logs
+
+node_modules/
+_.log
+npm-debug.log_
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+
+dist/
+build/
+out/
+
+# Cache directories
+
+.cache/
+.parcel-cache/
+.nuxt/
+.vuepress/dist
+
+# Other
+
+.DS_Store
+Thumbs.db

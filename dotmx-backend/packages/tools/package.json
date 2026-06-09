@@ -1,0 +1,27 @@
+{
+  "name": "@dotmx/tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DotMX Tools - Testing, benchmarks, load generator, CLI",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "dotmx-bench": "./dist/cli/bench.js",
+    "dotmx-replay": "./dist/cli/replay.js"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "bun test",
+    "bench": "bun run src/cli/bench.ts",
+    "replay": "bun run src/cli/replay.ts"
+  },
+  "dependencies": {
+    "@dotmx/shared": "workspace:*",
+    "@dotmx/engine": "workspace:*"
+  }
+}

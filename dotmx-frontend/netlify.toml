@@ -1,0 +1,49 @@
+[build]
+  publish = ".next"
+  command = "npm run build"
+
+[build.environment]
+  # Configure secrets scanning to omit specific paths and keys
+  # Note: route.ts files are server-side only and never sent to the browser
+  SECRETS_SCAN_OMIT_PATHS = ".next/cache/**,.netlify/.next/cache/**,.netlify/.next/app-build-manifest.json,src/app/**/route.ts"
+  SECRETS_SCAN_OMIT_KEYS = "SUBGRAPH_API_KEY,SUBGRAPH_MAINNET_ID"
+  # Clear the Next.js cache to prevent environment variable leakage
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Functions configuration for Next.js API routes
+[functions]
+  directory = ".netlify/functions"
+  node_bundler = "esbuild"
+
+# Environment variable handling
+[context.production.environment]
+  # Only allow NEXT_PUBLIC_ prefixed variables in production builds
+  NODE_ENV = "production"
+  # Configure secrets scanning for production
+  SECRETS_SCAN_OMIT_PATHS = ".next/cache/**,.netlify/.next/cache/**,.netlify/.next/app-build-manifest.json,src/app/**/route.ts"
+  SECRETS_SCAN_OMIT_KEYS = "SUBGRAPH_API_KEY,SUBGRAPH_MAINNET_ID"
+  # Disable telemetry and clear cache
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "development"
+  # Configure secrets scanning for deploy previews
+  SECRETS_SCAN_OMIT_PATHS = ".next/cache/**,.netlify/.next/cache/**,.netlify/.next/app-build-manifest.json,src/app/**/route.ts"
+  SECRETS_SCAN_OMIT_KEYS = "SUBGRAPH_API_KEY,SUBGRAPH_MAINNET_ID"
+  # Disable telemetry and clear cache
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Optional: Set up redirects for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

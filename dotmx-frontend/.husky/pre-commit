@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# ==============================================================================
+# Pre-commit Hook
+# ==============================================================================
+# 1. Auto-fix staged files with lint-staged
+# 2. Run auto-versioning with changelog
+# ==============================================================================
+
+# --- Configuration ---
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# --- Helper Functions ---
+log_info() { echo "✓ $1"; }
+log_warn() { echo "⚠️  $1"; }
+log_step() { echo "🔧 $1"; }
+
+# ==============================================================================
+# Main Flow
+# ==============================================================================
+
+cd "$PROJECT_ROOT" || exit 1
+
+# Step 1: Auto-fix with lint-staged
+log_step "Auto-fixing staged files..."
+pnpm exec lint-staged 2>/dev/null || pnpm lint:fix --quiet 2>/dev/null || log_warn "Some lint issues may need manual attention"
+
+# Re-stage any auto-fixed files
+git add -u 2>/dev/null || true
+
+# Step 2: Run auto-versioning
+log_step "Running auto-versioning..."
+if [[ -f scripts/auto-version-changelog.sh ]]; then
+    bash scripts/auto-version-changelog.sh 2>/dev/null || log_warn "Auto-versioning skipped"
+else
+    log_warn "Auto-version script not found, skipping..."
+fi
+
+log_info "Pre-commit checks passed"
+exit 0

@@ -1,0 +1,6 @@
+packages:
+  - "dotmx-backend"
+  - "dotmx-backend/packages/*"
+  - "dotmx-frontend"
+  - "dotmx-alfred"
+  - "dotmx-mm-bot"

@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "noEmit": false,
+    "types": ["bun-types"],
+    "typeRoots": ["./types", "./node_modules/@types"]
+  },
+  "include": ["types/**/*.d.ts"],
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/engine" },
+    { "path": "packages/api" },
+    { "path": "packages/gateway" },
+    { "path": "packages/persistence" },
+    { "path": "packages/marketdata" },
+    { "path": "packages/ledger" },
+    { "path": "packages/management" },
+    { "path": "packages/zk" },
+    { "path": "packages/tools" }
+  ]
+}

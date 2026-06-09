@@ -1,0 +1,67 @@
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                            INTERNET                                    │
+└───────────────────────────────┬────────────────────────────────────────┘
+                                │
+                                │ HTTPS/HTTP
+                                │
+                    ┌───────────▼──────────┐
+                    │   Kong API Gateway   │  ◄── Only Exposed Service
+                    │   (DB-less mode)     │
+                    │   Port 80/443        │
+                    └───────────┬──────────┘
+                                │
+                ┌───────────────┼───────────────┐
+                │               │               │
+        ┌───────▼────┐  ┌──────▼─────┐  ┌─────▼─────────┐
+        │    /api    │  │  /market   │  │/api/management│
+        │            │  │            │  │ (IP restricted)│
+        └───────┬────┘  └──────┬─────┘  └─────┬─────────┘
+                │              │               │
+     ┌──────────▼──────┐  ┌───▼────────┐  ┌──▼───────────┐
+     │   API Service   │  │ MarketData │  │ Management   │
+     │   Port 3003     │  │ Port 3002  │  │ Port 3004    │
+     │   (internal)    │  │ (internal) │  │ (internal)   │
+     └────────┬────────┘  └─────┬──────┘  └──────┬───────┘
+              │                 │                 │
+              │    ┌────────────┼────────────────┐
+              │    │            │                 │
+     ┌────────▼────▼───┐  ┌────▼─────┐  ┌────────▼──────┐
+     │  Engine Service │  │   NATS   │  │  PostgreSQL   │
+     │   Port 3001     │  │ Port 4222│  │  Port 5432    │
+     │   (internal)    │  │(internal)│  │  (internal)   │
+     │  Not Exposed    │  └──────────┘  └───────────────┘
+     └─────────────────┘
+              │
+              │ Metrics (9090)
+              │ (internal only)
+              ▼
+     ┌─────────────────┐
+     │   Prometheus    │
+     │   (monitoring)  │
+     └─────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  REDIS                                                          │
+│  Port 6379 (internal)                                          │
+│  Used by: Kong (rate limiting), API, MarketData               │
+└─────────────────────────────────────────────────────────────────┘
+
+LEGEND:
+  ┌─────┐
+  │ Box │  = Service Container
+  └─────┘
+  
+  ───►   = HTTP Request
+  ────   = Internal Communication
+  
+  (internal) = Not exposed to internet
+  Port XX    = Internal port number
+
+KEY POINTS:
+  • Only Kong is exposed (Port 80/443)
+  • All backend services are internal only
+  • Engine (Port 3001) is NOT exposed externally
+  • Management API has IP restrictions
+  • All services communicate via Docker internal network
+```

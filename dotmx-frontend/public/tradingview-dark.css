@@ -1,0 +1,122 @@
+/* DotMX – TradingView Chart Dark Override
+ * Forces pure-black (#000000) background to match the rest of the app.
+ * Design tokens: --background: #000000, --background-card: #050505,
+ *   --border: #0a0a0a, --foreground-muted: #9ca3af, --accent: #3a8dff
+ */
+
+/* ── Global container backgrounds ──────────────────────────────────────── */
+
+html,
+body,
+.tradingview-widget-container,
+.chart-container,
+.chart-markup-table,
+.layout__area--center,
+.layout__area--left,
+.layout__area--right,
+.layout__area--top,
+.layout__area--bottom {
+  background: #000000 !important;
+  background-color: #000000 !important;
+}
+
+/* TradingView root CSS variables – force dark */
+:root {
+  --tv-color-platform-background: #000000 !important;
+  --tv-color-pane-background: #000000 !important;
+  --tv-color-toolbar-button-background-hover: #0a0a0a !important;
+  --tv-color-toolbar-button-background-secondary-hover: #0a0a0a !important;
+  --tv-color-toolbar-button-background-expanded: #050505 !important;
+  --tv-color-toolbar-button-text: #9ca3af !important;
+  --tv-color-toolbar-button-text-hover: #ffffff !important;
+  --tv-color-toolbar-button-text-active: #3a8dff !important;
+  --tv-color-toolbar-button-text-active-hover: #5ba3ff !important;
+  --tv-color-toolbar-toggle-button-background-active: #3a8dff !important;
+  --tv-color-toolbar-toggle-button-background-active-hover: #5ba3ff !important;
+  --tv-color-item-active-text: #ffffff !important;
+  --tv-color-popup-background: #050505 !important;
+  --tv-color-popup-element-background-hover: #0a0a0a !important;
+  --tv-color-popup-element-text: #9ca3af !important;
+  --tv-color-popup-element-text-hover: #ffffff !important;
+  --tv-color-popup-element-divider: #0a0a0a !important;
+  --tv-color-popup-element-secondary-text: #6b7280 !important;
+  --tv-color-toolbar-divider-background: #0a0a0a !important;
+}
+
+/* ── Top toolbar / header area ─────────────────────────────────────────── */
+
+.chart-controls-bar,
+.header-chart-panel,
+.chart-widget,
+.group-wWM3zP_M-,
+.inner-nGEg_ILH-,
+.chart-page {
+  background: #000000 !important;
+  background-color: #000000 !important;
+}
+
+/* ── Side toolbar ──────────────────────────────────────────────────────── */
+
+.drawing-toolbar,
+.side-toolbar,
+.group-wWM3zP_M-.inner-nGEg_ILH- {
+  background: #000000 !important;
+}
+
+/* ── Bottom toolbar / timeframes ───────────────────────────────────────── */
+
+.bottom-widgetbar-content,
+.chart-controls-bar {
+  background: #000000 !important;
+  border-top-color: #0a0a0a !important;
+}
+
+/* ── Price & time scales ───────────────────────────────────────────────── */
+
+.price-axis,
+.time-axis {
+  background: #000000 !important;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a8dff;
+}
+
+/* ── Dialogs & popups ──────────────────────────────────────────────────── */
+
+.dialog-container,
+.tv-dialog {
+  background: #050505 !important;
+  border-color: #0a0a0a !important;
+}
+
+/* ── Loading ───────────────────────────────────────────────────────────── */
+
+.tv-loading,
+.loading-indicator {
+  background: #000000 !important;
+  color: #9ca3af !important;
+}
+
+/* ── Legend / OHLC text ────────────────────────────────────────────────── */
+
+.chart-legend,
+.pane-legend {
+  color: #9ca3af !important;
+}

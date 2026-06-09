@@ -1,0 +1,57 @@
+name: Deploy to Production
+
+on:
+  # push:
+  #   branches:
+  #     - main
+  #     - master
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to calgary.petaex.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          script: |
+            set -e
+            echo "🚀 Starting deployment..."
+            
+            # Navigate to project directory
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            # Pull latest code
+            echo "📥 Pulling latest code from GitHub..."
+            git fetch origin
+            git reset --hard origin/main
+            
+            # Deploy database (only on main branch, with backups)
+            echo "🗄️  Deploying database..."
+            bash scripts/deploy-db.sh production
+            
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            bun install
+            
+            # Build project
+            echo "🔨 Building project..."
+            bun run build
+            
+            # Restart services
+            echo "🔄 Restarting services..."
+            bash scripts/restart-services.sh
+            
+            echo "✅ Deployment complete!"
+

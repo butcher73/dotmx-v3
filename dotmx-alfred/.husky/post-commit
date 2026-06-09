@@ -1,0 +1,11 @@
+#!/bin/sh
+# Prevent infinite loop - only run once per commit session
+if [ -n "$HUSKY_SKIP_HOOKS" ]; then
+  exit 0
+fi
+
+export HUSKY_SKIP_HOOKS=1
+
+pnpm run version:patch
+git add package.json pnpm-lock.yaml package-lock.json 2>/dev/null || true
+HUSKY_SKIP_HOOKS=1 git commit --amend --no-edit --no-verify

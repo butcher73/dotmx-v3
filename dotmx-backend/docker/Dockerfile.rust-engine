@@ -1,0 +1,54 @@
+# Build stage (edition 2024 requires nightly)
+FROM rustlang/rust:nightly-bookworm AS builder
+
+WORKDIR /app
+
+# Allow edition 2024 crates
+ENV CARGO_UNSTABLE_EDITION2024=1
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy manifest (no Cargo.lock in repo; lock will be generated in-build)
+COPY rust-engine/Cargo.toml ./Cargo.toml
+COPY rust-engine/crates ./crates
+
+# Build release binary
+RUN cargo build --release --bin dotmx-engine
+
+# Runtime stage
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy binary from builder
+COPY --from=builder /app/target/release/dotmx-engine /app/dotmx-engine
+
+# Create non-root user
+RUN useradd -r -s /bin/false dotmx
+USER dotmx
+
+# Expose metrics port
+EXPOSE 9090
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:9090/metrics || exit 1
+
+# Set environment defaults
+ENV RUST_LOG=dotmx=info \
+    ENGINE_INSTANCE_ID=engine-1 \
+    ENGINE_SYMBOLS=BTC-USDT,ETH-USDT \
+    NATS_URLS=nats://nats:4222 \
+    METRICS_PORT=9090
+
+ENTRYPOINT ["/app/dotmx-engine"]

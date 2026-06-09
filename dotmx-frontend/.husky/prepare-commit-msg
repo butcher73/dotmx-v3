@@ -1,0 +1,138 @@
+#!/bin/bash
+
+# ==============================================================================
+# Prepare Commit Message Hook - AI-powered commit messages
+# ==============================================================================
+
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="$2"
+
+# Skip if message already provided (amend, merge, -m flag, etc.)
+if [[ -n "$COMMIT_SOURCE" ]]; then
+    exit 0
+fi
+
+# Check if commit message file already has content (user provided -m)
+if [[ -s "$COMMIT_MSG_FILE" ]]; then
+    EXISTING=$(grep -v "^#" "$COMMIT_MSG_FILE" | grep -v "^$" | head -1)
+    if [[ -n "$EXISTING" ]]; then
+        exit 0
+    fi
+fi
+
+# --- Configuration ---
+PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+MAX_DIFF_SIZE=102400
+
+cd "$PROJECT_ROOT" || exit 0
+
+# Load environment variables
+if [[ -f .env ]]; then
+    set -a
+    source .env 2>/dev/null
+    set +a
+fi
+if [[ -f .env.local ]]; then
+    set -a
+    source .env.local 2>/dev/null
+    set +a
+fi
+
+# --- Fallback message ---
+create_fallback_message() {
+    local files
+    files=$(git diff --staged --name-only 2>/dev/null)
+    
+    if [[ -z "$files" ]]; then
+        echo "chore: update project files"
+    elif [[ $(echo "$files" | wc -l) -eq 1 ]]; then
+        echo "chore: update $files"
+    else
+        echo "chore: update $(echo "$files" | wc -l | tr -d ' ') files"
+    fi
+}
+
+# --- AI message generation using Python (no jq dependency) ---
+generate_ai_message() {
+    local diff="$1"
+    
+    if [[ -z "$GEMINI_API_KEY" ]]; then
+        return 1
+    fi
+
+    # Use Python for the API call - more reliable than curl+jq
+    python3 - "$diff" "$GEMINI_API_KEY" 2>/dev/null << 'PYTHON_SCRIPT'
+import json
+import urllib.request
+import urllib.error
+import base64
+import sys
+
+try:
+    diff = sys.argv[1]
+    api_key = sys.argv[2]
+
+    # Base64 encode the diff
+    diff_b64 = base64.b64encode(diff.encode()).decode()
+    prompt = f"Generate a concise commit message in the conventional commit format from this diff:\n\n{diff_b64}"
+
+    # Build request
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key={api_key}"
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.3, "maxOutputTokens": 500}
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=30) as response:
+        data = json.loads(response.read().decode())
+        message = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        # Clean up markdown code blocks
+        message = message.replace('```', '').strip()
+        # Remove newlines
+        message = ' '.join(message.split())
+        print(message)
+except Exception:
+    sys.exit(1)
+PYTHON_SCRIPT
+}
+
+# ==============================================================================
+# Main
+# ==============================================================================
+
+echo "🤖 Generating AI commit message..."
+
+# Get staged diff
+DIFF=$(git diff --staged 2>/dev/null)
+
+if [[ -z "$DIFF" ]]; then
+    COMMIT_MESSAGE=$(create_fallback_message)
+    echo "$COMMIT_MESSAGE" > "$COMMIT_MSG_FILE"
+    echo "✓ Generated: $COMMIT_MESSAGE"
+    exit 0
+fi
+
+# Truncate large diffs
+if [[ ${#DIFF} -gt $MAX_DIFF_SIZE ]]; then
+    echo "⚠️  Diff too large, truncating..." >&2
+    DIFF="${DIFF:0:$MAX_DIFF_SIZE}"
+fi
+
+# Generate message
+COMMIT_MESSAGE=$(generate_ai_message "$DIFF" 2>/dev/null)
+EXIT_CODE=$?
+
+if [[ $EXIT_CODE -ne 0 ]] || [[ -z "$COMMIT_MESSAGE" ]] || [[ "$COMMIT_MESSAGE" == Error:* ]]; then
+    echo "⚠️  AI generation failed, using fallback..." >&2
+    COMMIT_MESSAGE=$(create_fallback_message)
+fi
+
+echo "✓ Generated: $COMMIT_MESSAGE"
+echo "$COMMIT_MESSAGE" > "$COMMIT_MSG_FILE"
+exit 0

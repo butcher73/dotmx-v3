@@ -1,0 +1,70 @@
+{
+  "name": "dotmx-v3-frontend",
+  "version": "3.0.109",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
+    "prebuild": "rm -rf .next .netlify",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint:check": "eslint src --ext .ts,.tsx --quiet",
+    "lint:strict": "eslint . --ext .ts,.tsx --max-warnings 0",
+    "format": "eslint . --ext .ts,.tsx --fix && echo 'Linting completed with auto-fix'",
+    "version:auto": "bash scripts/auto-version.sh",
+    "version:major": "npm version major --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@netlify/plugin-nextjs": "^5.13.3",
+    "chart.js": "^4.5.1",
+    "lucide-react": "^0.543.0",
+    "next": "^15.5.7",
+    "pino-pretty": "^13.1.1",
+    "qrcode": "^1.5.4",
+    "react": "19.1.1",
+    "react-chartjs-2": "^5.3.1",
+    "react-dom": "19.1.1",
+    "recharts": "^3.2.1",
+    "sonner": "^2.0.7"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9.35.0",
+    "@next/eslint-plugin-next": "^15.4.5",
+    "@swc/core": "^1.13.5",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9",
+    "eslint-config-next": "^15.5.7",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}

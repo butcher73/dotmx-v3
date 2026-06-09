@@ -1,0 +1,25 @@
+{
+  "name": "dotmx-mm-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "bun run scripts/seed-mm-accounts.ts",
+    "start": "bun run src/index.ts",
+    "start:dry": "bun run src/index.ts --dry-run",
+    "dev": "bun run --watch src/index.ts",
+    "status": "bun run scripts/check-status.ts",
+    "test": "bun test",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "pg": "^8.13.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0",
+    "@types/ws": "^8.5.0",
+    "typescript": "^5.7.0",
+    "@types/bun": "latest"
+  }
+}

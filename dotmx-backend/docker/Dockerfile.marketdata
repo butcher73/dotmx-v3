@@ -1,0 +1,31 @@
+# Market Data service
+FROM oven/bun:1.1-alpine AS base
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json bun.lock ./
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/marketdata/package.json ./packages/marketdata/
+COPY packages/api/package.json ./packages/api/
+COPY packages/engine/package.json ./packages/engine/
+COPY packages/gateway/package.json ./packages/gateway/
+COPY packages/persistence/package.json ./packages/persistence/
+COPY packages/ledger/package.json ./packages/ledger/
+COPY packages/zk/package.json ./packages/zk/
+COPY packages/tools/package.json ./packages/tools/
+COPY packages/management/package.json ./packages/management/
+RUN bun install
+
+FROM deps AS builder
+COPY . .
+RUN bun run build
+
+FROM base AS runner
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/
+COPY --from=builder /app/packages/marketdata/dist ./packages/marketdata/dist
+COPY --from=builder /app/packages/marketdata/package.json ./packages/marketdata/
+COPY --from=builder /app/package.json ./
+
+CMD ["bun", "run", "packages/marketdata/dist/index.js"]

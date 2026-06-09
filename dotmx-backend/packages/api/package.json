@@ -1,0 +1,23 @@
+{
+  "name": "@dotmx/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DotMX API Service - ElysiaJS REST/WebSocket endpoints",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "bun run src/server.ts",
+    "start": "bun run dist/server.js",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@dotmx/shared": "workspace:*",
+    "@dotmx/engine": "workspace:*",
+    "elysia": "latest"
+  }
+}

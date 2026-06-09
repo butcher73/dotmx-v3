@@ -1,0 +1,18 @@
+node_modules
+.next
+.vercel
+.turbo
+dist
+build
+out
+coverage
+*.log
+.DS_Store
+.env*.local
+.vscode/settings.json
+.idea
+*.tsbuildinfo
+
+# Prettier ignore
+public/charting_library/
+src/libs/charting_library/

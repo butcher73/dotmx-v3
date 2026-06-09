@@ -1,0 +1,51 @@
+[package]
+name = "dotmx-engine"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "DotMX Matching Engine - High performance order matching"
+
+[[bin]]
+name = "dotmx-engine"
+path = "src/main.rs"
+
+[dependencies]
+dotmx-core = { path = "../dotmx-core" }
+dotmx-risk = { path = "../dotmx-risk" }
+dotmx-transport = { path = "../dotmx-transport" }
+
+tokio = { workspace = true }
+async-nats = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+config = { workspace = true }
+dotenvy = { workspace = true }
+parking_lot = { workspace = true }
+dashmap = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+futures = { workspace = true }
+
+# Metrics
+metrics = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }
+
+# Signal handling
+ctrlc = "3.4"
+
+[dev-dependencies]
+criterion = { workspace = true }
+proptest = { workspace = true }
+
+[[bench]]
+name = "engine_bench"
+harness = false
+
+[[bench]]
+name = "comprehensive_bench"
+harness = false

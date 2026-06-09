@@ -1,0 +1,31 @@
+{
+  "name": "dotmx-v3",
+  "version": "3.0.0",
+  "private": true,
+  "description": "DotMX v3 — Cryptocurrency Exchange Platform Monorepo",
+  "scripts": {
+    "dev:api": "cd dotmx-backend && pnpm dev:api",
+    "dev:engine": "cd dotmx-backend && pnpm dev:engine",
+    "dev:marketdata": "cd dotmx-backend && pnpm dev:marketdata",
+    "dev:management": "cd dotmx-backend && pnpm dev:management",
+    "dev:frontend": "cd dotmx-frontend && npm run dev",
+    "dev:alfred": "cd dotmx-alfred && pnpm dev",
+    "dev:mm-bot": "cd dotmx-mm-bot && bun run start",
+    "dev:all": "bash scripts/dev/start-all.sh",
+    "build:backend": "cd dotmx-backend && pnpm build",
+    "build:frontend": "cd dotmx-frontend && npm run build",
+    "build:alfred": "cd dotmx-alfred && pnpm build",
+    "test:backend": "cd dotmx-backend && pnpm test",
+    "test:rust": "cd dotmx-backend/rust-engine && cargo test",
+    "test:mm-bot": "cd dotmx-mm-bot && bun test",
+    "db:reset": "cd dotmx-backend && bash scripts/db/reset-and-seed.sh",
+    "db:migrate": "cd dotmx-backend && bash scripts/deploy-db.sh development",
+    "lint:backend": "cd dotmx-backend && pnpm typecheck",
+    "lint:frontend": "cd dotmx-frontend && npm run lint",
+    "lint:alfred": "cd dotmx-alfred && pnpm lint",
+    "docker:up": "cd dotmx-backend && docker compose up -d",
+    "docker:down": "cd dotmx-backend && docker compose down",
+    "docker:dev": "cd dotmx-backend && docker compose -f docker-compose.dev.yml up -d",
+    "clean": "cd dotmx-backend && pnpm clean"
+  }
+}
