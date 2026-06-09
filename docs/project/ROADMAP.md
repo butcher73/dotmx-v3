@@ -371,10 +371,10 @@ These run continuously alongside feature work:
 ## References
 
 - [Design Changes: Original vs Current](DESIGN_CHANGES.md)
-- [Module Status & Feature Checklist](dotmx-backend/MODULE_STATUS.md)
-- [Database Schema Audit](dotmx-backend/DB_SCHEMA_AUDIT_REPORT.md)
-- [Database Refactoring Tasks](dotmx-backend/REFACTORING_TASKS.md)
-- [Production Checklist](dotmx-backend/docs/operations/PRODUCTION_CHECKLIST.md)
-- [Deployment Checklist](dotmx-backend/docs/operations/DEPLOYMENT_CHECKLIST.md)
-- [Product Overview](dotmx-frontend/PRODUCT_OVERVIEW.md)
-- [Endpoint Reference](ENDPOINT_REFERENCE.md)
+- [Module Status & Feature Checklist](../backend/MODULE_STATUS.md)
+- [Database Schema Audit](../audits/DB_SCHEMA_AUDIT_REPORT.md)
+- [Database Refactoring Tasks](../backend/REFACTORING_TASKS.md)
+- [Production Checklist](../../dotmx-backend/docs/operations/PRODUCTION_CHECKLIST.md)
+- [Deployment Checklist](../../dotmx-backend/docs/operations/DEPLOYMENT_CHECKLIST.md)
+- [Product Overview](../frontend/PRODUCT_OVERVIEW.md)
+- [Endpoint Reference](../backend/ENDPOINT_REFERENCE.md)

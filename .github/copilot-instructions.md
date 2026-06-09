@@ -14,7 +14,7 @@ DotMX is a high-performance cryptocurrency exchange platform with a **monorepo s
 Internet → Kong (:80/443) → Internal Services (3001-3004)
 ```
 - API Server: Port 3003 (via `/api`)
-- MarketData: Port 3002 (via `/market`)  
+- MarketData: Port 3002 (via `/market`)
 - Management: Port 3004 (via `/api/management`)
 - Engine: Port 3001 (internal only, NATS communication)
 
@@ -319,7 +319,7 @@ const hash = await Bun.password.hash(password, {
 - Architecture: `dotmx-backend/docs/architecture/`
 - API Reference: `dotmx-backend/docs/api/`
 - Production Setup: `dotmx-backend/PRODUCTION_CONFIG.md`
-- Module Status: `dotmx-backend/MODULE_STATUS.md` (feature completeness tracker)
+- Module Status: `docs/backend/MODULE_STATUS.md` (feature completeness tracker)
 
 ## Key Files to Reference
 - Backend route wiring: `dotmx-backend/apps/api-server-with-auth.ts`
@@ -330,7 +330,7 @@ const hash = await Bun.password.hash(password, {
 
 ## When Adding New Features
 1. **Backend route**: Create `{feature}.routes.ts` with factory function
-2. **Types**: Define in route file or `../types/index.ts` 
+2. **Types**: Define in route file or `../types/index.ts`
 3. **Wire route**: Import and `.use()` in server entry point
 4. **Frontend service**: Add methods to `src/services/{feature}.ts`
 5. **UI components**: Create page in `app/{route}/page.tsx`
